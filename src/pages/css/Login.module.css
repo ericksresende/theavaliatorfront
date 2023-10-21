@@ -1,0 +1,37 @@
+body{
+  background-color: #404040;
+}
+  
+  .container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    }
+  
+  .box {
+    width: 500px;
+    height: 336px;
+    background: #243856;
+  }
+  
+  body {
+    margin: 0px;
+    font-family: Segoe UI Light;
+  }
+  
+  h3{
+    text-align: center;
+    color: white;
+    font-size: 25px;
+    margin-bottom: 0px;
+  }
+  
+  p{
+    text-align: center;
+    color: white;
+    font-size: 15px;
+  }
+  
