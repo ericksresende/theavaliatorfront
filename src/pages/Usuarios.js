@@ -7,6 +7,7 @@ import {
   ListItemButton,
   CircularProgress,
 } from '@mui/material';
+import '../pages/css/Base.module.css'
 import Navbar from './components/Navbar';
 import User from '../services/UsersQuizz';
 import Problem from '../services/Problem';
@@ -16,6 +17,7 @@ import SourceCode from '../services/SourceCode';
 import ScoreSourceCode from '../services/ScoreSourceCode';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import SendIcon from '@mui/icons-material/Send';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { useNavigate } from 'react-router-dom';
 
 const Usuarios = () => {
@@ -28,22 +30,27 @@ const Usuarios = () => {
   const idtarefa = sessionStorage.getItem('idtarefa');
   const nometarefa = sessionStorage.getItem('nometarefa');
   const datalimite = sessionStorage.getItem('datalimite');
+  const nometurma = sessionStorage.getItem('nometurma');
 
   const user = new User(token, idtarefa);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!sessionStorage.getItem('token')) {
+      navigate("/");
+    } else {
+      user.getUsers()
+        .then((data) => {
+          setUserData(data);
+          obterProblemas(data);
+        });
+    }
+  }, []);
 
   function acessarSubmissoes(id, title) {
     sessionStorage.setItem('idusuario', id);
     navigate('/problemas');
   }
-
-  useEffect(() => {
-    user.getUsers()
-      .then((data) => {
-        setUserData(data);
-        obterProblemas(data);
-      });
-  }, []);
 
   async function obterSubmissoes(dataproblems, idusuario, datalimite) {
     const submissoesAlunoAtual = [];
@@ -86,20 +93,40 @@ const Usuarios = () => {
 
   async function obterPontuacoes(token, submissionStudentData, submissionTeacherData, title) {
     const scoreData = [[]];
-    const sourceCodeAlunosData = [[]];
+    const sourceCodeAlunosData = [];
     const arrayProblemas = sessionStorage.getItem("arrayProblemas");
+    const jsonArray = JSON.parse(arrayProblemas);
+    console.log(jsonArray);
+
+    for (let k = 0; k < jsonArray.length; k++) {
+      sourceCodeAlunosData.push([]);
+    }
+
 
     for (let i = 0; i <  submissionStudentData.length; i++) {
+      console.log("1");
       for (let j = 0; j < submissionStudentData[i].length; j++) {
-        for (let k = 0; k < arrayProblemas.lenght; k++) {
-          if (submissionStudentData[i][j][0].problem.id === arrayProblemas[k].problem.id) {
+        console.log("2");
+        console.log(jsonArray.length)
+        for (let k = 0; k < jsonArray.length; k++) {
+          console.log("3");
+          console.log("teste com " + jsonArray[k]);
+          if (submissionStudentData[i][j][0].problem.id === jsonArray[k].id) {
             let sourceCodeAlunoData;
+            console.log("teste");
             // let sourceCodeProfessorData;
             const sourcecodeAluno = new SourceCode(token, submissionStudentData[i][j][0].id);
             // const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[k][0].id);
+            const idsubmissao = submissionStudentData[i][j][0].id;
 
             await sourcecodeAluno.getSourceCode().then((data) => {
-              sourceCodeAlunosData[k].push(data);
+              const array = 
+                {
+                  id: submissionStudentData[i][j][0].id, codigo: data
+                }
+              
+
+              sourceCodeAlunosData[k].push(array);
             });
             // await sourcecodeProfessor.getSourceCode().then((data) => {
             //   sourceCodeProfessorData = data;
@@ -129,9 +156,19 @@ const Usuarios = () => {
         }
       }
     }
+    let sourceCodeProfessorData;
+    const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[1][0].id);
+    await sourcecodeProfessor.getSourceCode().then((data) => {
+      sourceCodeProfessorData = data;
+    });
+
+
+          
+    const score = new ScoreSourceCode(jsonArray[1].id, sourceCodeAlunosData[1], sourceCodeProfessorData, jsonArray[1].name);
+    const pontuacao = await score.getScore();
+    console.log(pontuacao);
   
     // sessionStorage.setItem("scoreData", scoreData);
-    console.log(sourceCodeAlunosData);
   }
 
   async function obterProblemas(userData) {  
@@ -163,7 +200,7 @@ const Usuarios = () => {
         background: "white",
         alignItems: "center",
       }}>
-        <h2>Lista de Alunos da tarefa {nometarefa}</h2>
+        <h2>{nometurma} {<KeyboardArrowRightIcon/>} {nometarefa}</h2>
         <br></br>
         <Box>
           <Box style={{

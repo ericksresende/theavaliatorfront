@@ -1,9 +1,9 @@
-import axios from 'axios';
+import api from './Api';
 
 class User {
   constructor(token, codigoTarefa) {
     this.token = token;
-    this.url = `http://localhost:5275/api/${codigoTarefa}/users`;
+    this.url = `/${codigoTarefa}/users`;
     this.config = {
       headers: {
         'Content-Type': 'application/json',
@@ -15,7 +15,7 @@ class User {
 
   async getUsers(){
     try {
-      const response = await axios.get(
+      const response = await api.get(
         this.url,
         this.config
       );

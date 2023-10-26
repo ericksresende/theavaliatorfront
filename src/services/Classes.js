@@ -1,11 +1,11 @@
-import axios from 'axios';
+import api from './Api';
 
 // Pega a lista de turmas e precisa do token para realizar a requisição
 
 class Classes {
   constructor(token) {
     this.token = token;
-    this.url = 'http://localhost:5275/api/classes';
+    this.url = '/classes';
     this.config = {
       headers: {
         'Content-Type': 'application/json',
@@ -17,7 +17,7 @@ class Classes {
   
   async getClasses(){
     try {
-      const response = await axios.get(
+      const response = await api.get(
         this.url,
         this.config
       );

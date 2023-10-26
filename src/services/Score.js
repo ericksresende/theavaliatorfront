@@ -1,11 +1,11 @@
 /* eslint-disable eqeqeq */
-import axios from 'axios';
+import api from './Api';
 
 
 class Submission {
   constructor(token, idturma, idtarefa) {
     this.token = token;
-    this.urlsource = `http://localhost:5275/api/submissions/${idturma}/${idtarefa}`;
+    this.urlsource = `/submissions/${idturma}/${idtarefa}`;
     this.configsource = {
       headers: {
         'Content-Type': 'application/json',
@@ -16,7 +16,7 @@ class Submission {
   }
 
   async getSubmissions(){
-    const response = await axios.get(
+    const response = await api.get(
         this.urlsource,
         this.configsource
       );

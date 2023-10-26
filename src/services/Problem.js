@@ -1,11 +1,11 @@
-import axios from 'axios';
+import api from './Api';
 
 // Pega a lista de problemas e utiliza o token, o ID da tarefa e o ID do usuario
 
 class Problem {
   constructor(token, codigoTarefa, codigoUsuario) {
     this.token = token;
-    this.url = `http://localhost:5275/api/${codigoTarefa}/${codigoUsuario}/problems`;
+    this.url = `/${codigoTarefa}/${codigoUsuario}/problems`;
     this.config = {
       headers: {
         'Content-Type': 'application/json',
@@ -17,7 +17,7 @@ class Problem {
 
   async getProblems(){
     try {
-      const response = await axios.get(
+      const response = await api.get(
         this.url,
         this.config
       );

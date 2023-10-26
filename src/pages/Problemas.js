@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, ListItem, ListItemText, ListItemButton } from '@mui/material';
+import '../pages/css/Base.module.css'
 import Navbar from './components/Navbar';
 import Problem from '../services/Problem';
 import { useNavigate } from 'react-router-dom';
@@ -13,19 +14,23 @@ const Problemas = () => {
   const problem = new Problem(token, idtarefa, idusuario);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!sessionStorage.getItem('token')) {
+      navigate("/");
+    } else {
+      problem.getProblems().then((data) => {
+        setProblemData(data.problems);
+        setScoreData(data.scores);
+      });
+    }
+  }, []);
+
   function acessarSubmissoes(id, name, token) {
     sessionStorage.setItem("idproblema", id);
     sessionStorage.setItem("nomealuno", name);
     sessionStorage.setItem("token", token);
     navigate("/submissoes");
   }
-
-  useEffect(() => {
-    problem.getProblems().then((data) => {
-      setProblemData(data.problems);
-      setScoreData(data.scores);
-    });
-  }, []);
 
   const combinedListItems = problemData.map(({ id, name }) => {
     const matchingScore = scoreData.find((score) => score.problem_id === id);

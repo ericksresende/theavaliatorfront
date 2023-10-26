@@ -1,10 +1,10 @@
 /* eslint-disable eqeqeq */
-import axios from 'axios';
+import api from './Api';
 
 class Submission {
   constructor(token, codigoProblema, codigoUsuario, datalimite) {
     this.token = token;
-    this.url = `http://localhost:5275/api/submissions/${codigoProblema}/${codigoUsuario}/${datalimite}`;
+    this.url = `/submissions/${codigoProblema}/${codigoUsuario}/${datalimite}`;
     this.config = {
       headers: {
         'Content-Type': 'application/json',
@@ -15,7 +15,7 @@ class Submission {
   }
 
   async getSubmissions(){
-    const response = await axios.get(
+    const response = await api.get(
         this.url,
         this.config
       );

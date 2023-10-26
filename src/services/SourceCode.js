@@ -1,10 +1,10 @@
 /* eslint-disable eqeqeq */
-import axios from 'axios';
+import api from './Api';
 
 class SourceCode {
   constructor(token, codigoSubmissao) {
     this.token = token;
-    this.url = `http://localhost:5275/api/submissions/sourcecode/${codigoSubmissao}`;
+    this.url = `/submissions/sourcecode/${codigoSubmissao}`;
     this.config = {
       headers: {
         'Content-Type': 'application/json',
@@ -15,7 +15,7 @@ class SourceCode {
   }
 
   async getSourceCode(){
-    const response = await axios.get(
+    const response = await api.get(
         this.url,
         this.config
       );

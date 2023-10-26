@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './Api';
 
 /**
  * Realiza a autenticação do usuário.
@@ -7,8 +7,8 @@ import axios from 'axios';
  * @returns {Promise} - Uma promessa que resolve com a resposta da solicitação.
  */
 async function getToken(username, password) {
-  return axios.post(
-    "http://localhost:5275/api/auth",
+  return api.post(
+    "/auth",
     {
       username,
       password,

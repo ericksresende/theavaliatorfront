@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, ListItem, ListItemText, ListItemButton } from '@mui/material';
+import '../pages/css/Base.module.css'
 import Navbar from './components/Navbar';
 import Submission from '../services/Submission';
 import SubmissionTeacher from '../services/SubmissionTeacher';
@@ -20,6 +21,11 @@ const Submissoes = () => {
   const submission = new Submission(token, idproblema, idusuario, datalimite);
   const submissionteacher = new SubmissionTeacher(token, idproblema);
   const navigate = useNavigate();
+
+  if (!sessionStorage.getItem('token')) {
+    // Redirecione o usuário para a página de login ou exiba uma mensagem de erro
+    navigate("/");
+  }
 
   function acessarPontuacoes(id, name, token) {
     sessionStorage.setItem("idsubmissao", id);

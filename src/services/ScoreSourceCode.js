@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 class ScoreSourceCode {
-  constructor(idproblema, idsubmissaoaluno, codigoAluno, codigoProfessor, nomeProblema) {
+  constructor(idproblema, codigoAluno, codigoProfessor, nomeProblema) {
     this.urlsource = 'https://avaliador.guugascode.site/avaliarsubmissoes';
     this.configsource = {
         headers: {
@@ -12,9 +12,7 @@ class ScoreSourceCode {
       };
     this.jsonData = {
       id: idproblema,
-      alunos: [
-        {id: idsubmissaoaluno, codigo: codigoAluno},
-      ],
+      alunos: codigoAluno,
       professor: codigoProfessor,
       problema: nomeProblema
     };
