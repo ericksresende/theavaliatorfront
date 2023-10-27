@@ -1,5 +1,5 @@
 /* eslint-disable eqeqeq */
-import api from 'axios';
+import api from './Api.js';
 
 class SubmissionTeacher {
   constructor(token, codigoProblema) {

@@ -31,6 +31,7 @@ const Usuarios = () => {
   const nometarefa = sessionStorage.getItem('nometarefa');
   const datalimite = sessionStorage.getItem('datalimite');
   const nometurma = sessionStorage.getItem('nometurma');
+  const idturma = sessionStorage.getItem('idturma');
 
   const user = new User(token, idtarefa);
   const navigate = useNavigate();
@@ -104,15 +105,10 @@ const Usuarios = () => {
 
 
     for (let i = 0; i <  submissionStudentData.length; i++) {
-      console.log("1");
       for (let j = 0; j < submissionStudentData[i].length; j++) {
-        console.log("2");
         console.log(jsonArray.length)
         for (let k = 0; k < jsonArray.length; k++) {
-          console.log("3");
-          console.log("teste com " + jsonArray[k]);
           if (submissionStudentData[i][j][0].problem.id === jsonArray[k].id) {
-            let sourceCodeAlunoData;
             console.log("teste");
             // let sourceCodeProfessorData;
             const sourcecodeAluno = new SourceCode(token, submissionStudentData[i][j][0].id);
@@ -162,13 +158,16 @@ const Usuarios = () => {
       sourceCodeProfessorData = data;
     });
 
-
-          
-    const score = new ScoreSourceCode(jsonArray[1].id, sourceCodeAlunosData[1], sourceCodeProfessorData, jsonArray[1].name);
-    const pontuacao = await score.getScore();
-    console.log(pontuacao);
-  
-    // sessionStorage.setItem("scoreData", scoreData);
+    console.log(jsonArray);
+    const scoreSourceCodeData = [[]];
+    for (let l=0; l<jsonArray.lenght; l++) {
+      console.log("1");
+      const score = new ScoreSourceCode(jsonArray[l].id, sourceCodeAlunosData[l], sourceCodeProfessorData, jsonArray[l].name, idturma, idtarefa);
+      const pontuacao = await score.getScore();
+      console.log(pontuacao);
+      scoreSourceCodeData.push(pontuacao);
+      console.log(scoreSourceCodeData);
+    }
   }
 
   async function obterProblemas(userData) {  

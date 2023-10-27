@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 class ScoreSourceCode {
-  constructor(idproblema, codigoAluno, codigoProfessor, nomeProblema) {
-    this.urlsource = 'https://avaliador.guugascode.site/avaliarsubmissoes';
+  constructor(idproblema, codigoAluno, codigoProfessor, nomeProblema, idturma, idtarefa) {
+    this.urlsource = `https://backavaliadora.guugascode.site/api/avaliarsubmissoes?idTurma=${idturma}&idTarefa=${idtarefa}`;
     this.configsource = {
         headers: {
           'Content-Type': 'application/json',
