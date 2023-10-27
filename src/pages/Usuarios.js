@@ -92,77 +92,39 @@ const Usuarios = () => {
     return arraySubmissoesProfessor;
   }
 
-  async function obterPontuacoes(token, submissionStudentData, submissionTeacherData, title) {
+  async function obterPontuacoes(token, submissionStudentData, submissionTeacherData, arrayProblemas, title) {
     const scoreData = [[]];
     const sourceCodeAlunosData = [];
-    const arrayProblemas = sessionStorage.getItem("arrayProblemas");
-    const jsonArray = JSON.parse(arrayProblemas);
-    console.log(jsonArray);
 
-    for (let k = 0; k < jsonArray.length; k++) {
-      sourceCodeAlunosData.push([]);
-    }
-
-
-    for (let i = 0; i <  submissionStudentData.length; i++) {
-      for (let j = 0; j < submissionStudentData[i].length; j++) {
-        console.log(jsonArray.length)
-        for (let k = 0; k < jsonArray.length; k++) {
-          if (submissionStudentData[i][j][0].problem.id === jsonArray[k].id) {
+      for (let j = 0; j < submissionStudentData.length; j++) {
+        for (let k = 0; k < arrayProblemas.length; k++) {
+          if (submissionStudentData[j][0].problem.id === arrayProblemas[k].id) {
             console.log("teste");
             // let sourceCodeProfessorData;
-            const sourcecodeAluno = new SourceCode(token, submissionStudentData[i][j][0].id);
+            const sourcecodeAluno = new SourceCode(token, submissionStudentData[j][0].id);
             // const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[k][0].id);
-            const idsubmissao = submissionStudentData[i][j][0].id;
 
             await sourcecodeAluno.getSourceCode().then((data) => {
               const array = 
                 {
-                  id: submissionStudentData[i][j][0].id, codigo: data
+                  id: submissionStudentData[j][0].id, codigo: data
                 }
-              
 
               sourceCodeAlunosData[k].push(array);
             });
-            // await sourcecodeProfessor.getSourceCode().then((data) => {
-            //   sourceCodeProfessorData = data;
-            // });
-
-            // const score = new ScoreSourceCode(submissionStudentData[i][j][0].problem.id, submissionStudentData[i][j][0].id, sourceCodeAlunoData, sourceCodeProfessorData, submissionStudentData[i][j][0].problem.name);
-            // const pontuacao = await score.getScore();
-            // console.log(pontuacao);
-            // const array = [
-            //   { CYCLOMATIC_COMPLEXITY: pontuacao[1].CYCLOMATIC_COMPLEXITY },
-            //   { EXCEEDED_LIMIT_LLOC: pontuacao[1].EXCEEDED_LIMIT_LLOC },
-            //   { EXCEEDED_LIMIT_LOC: pontuacao[1].EXCEEDED_LIMIT_LOC },
-            //   { EXCEEDED_LIMIT_CC: pontuacao[1].EXCEEDED_LIMIT_CC },
-            //   { FINAL_SCORE: pontuacao[1].FINAL_SCORE },
-            //   { IS_TEACHER: pontuacao[1].IS_TEACHER },
-            //   { LIMIT_SLOC: pontuacao[1].LIMIT_SLOC },
-            //   { LINES_OF_CODE: pontuacao[1].LINES_OF_CODE },
-            //   { LOGICAL_LINES_OF_CODE: pontuacao[1].LOGICAL_LINES_OF_CODE },
-            //   { PROBLEM: pontuacao[1].PROBLEM },
-            //   { SOLUTION: pontuacao[1].SOLUTION },
-            //   { SOURCE_LINES_OF_CODE: pontuacao[1].SOURCE_LINES_OF_CODE }
-            // ];
-
-            // scoreData.push(array);
-            // console.log("Alunos pontuados: " + (i+1) + "/" + submissionStudentData.length);
           }
         }
       }
-    }
     let sourceCodeProfessorData;
     const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[1][0].id);
     await sourcecodeProfessor.getSourceCode().then((data) => {
       sourceCodeProfessorData = data;
     });
 
-    console.log(jsonArray);
     const scoreSourceCodeData = [[]];
-    for (let l=0; l<jsonArray.lenght; l++) {
+    for (let l=0; l<arrayProblemas.lenght; l++) {
       console.log("1");
-      const score = new ScoreSourceCode(jsonArray[l].id, sourceCodeAlunosData[l], sourceCodeProfessorData, jsonArray[l].name, idturma, idtarefa);
+      const score = new ScoreSourceCode(arrayProblemas[l].id, sourceCodeAlunosData[l], sourceCodeProfessorData, arrayProblemas[l].name, idturma, idtarefa);
       const pontuacao = await score.getScore();
       console.log(pontuacao);
       scoreSourceCodeData.push(pontuacao);
@@ -171,21 +133,32 @@ const Usuarios = () => {
   }
 
   async function obterProblemas(userData) {  
-    for (const { id } of userData) {
-      const problems = new Problem(token, idtarefa, id);
-      const data = await problems.getProblems();
+    const problems = new Problem(token, idtarefa, userData[0].id);
+    const data = await problems.getProblems();
   
-      sessionStorage.setItem("arrayProblemas", JSON.stringify(data.problems));
-      await obterSubmissoes(data, id, datalimite);
-    }
-  
-    const jsonString = sessionStorage.getItem("arrayProblemas");
-    const jsonArray = JSON.parse(jsonString);
+    const jsonArray = data.problems;
   
     const arraySubmissoesProfessor = await obterSubmissoesProfessor(jsonArray);
     console.log(arraySubmissoesProfessor);
-    await obterPontuacoes(token, arraySubmissoesAluno, arraySubmissoesProfessor, "teste");
+    for (const { id } of userData) {
+      const idusuario = id;
+      const submissoesAlunoAtual = [];
+  
+      for (const { id } of data.problems) {
+        const submission = new Submission(token, id, idusuario, datalimite);
+        const data = await submission.getSubmissions();
+        const correctSubmissions = data.filter(({ evaluation }) => evaluation === "CORRECT");
     
+        if (correctSubmissions.length === 0) {
+          continue; // Pule este problema se não houver submissões corretas
+        }
+    
+        const maxTries = Math.max(...correctSubmissions.map(({ tries }) => tries));
+        const bestSubmissions = correctSubmissions.filter(({ tries }) => tries === maxTries);
+        submissoesAlunoAtual.push(bestSubmissions);
+      }
+      await obterPontuacoes(token, submissoesAlunoAtual, arraySubmissoesProfessor, data.problems, "teste");
+    }
     // Após a conclusão da função obterPontuacoes, altere o estado de carregamento
     setLoading(false);
   }
