@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Usuarios = () => {
   const [userData, setUserData] = useState([]);
-  const [loading, setLoading] = useState(true); // Inicialmente, o estado de carregamento está definido como verdadeiro
+  const [loading, setLoading] = useState([]); // Inicialmente, o estado de carregamento está definido como verdadeiro
   const arraySubmissoesAluno = [];
   const arrayPontuacoes = [];
 
@@ -44,6 +44,8 @@ const Usuarios = () => {
         .then((data) => {
           setUserData(data);
           obterProblemas(data);
+          const loadingArray = Array(data.length).fill(true);
+          setLoading(loadingArray);
         });
     }
   }, []);
@@ -55,28 +57,28 @@ const Usuarios = () => {
 
   async function obterSubmissoes(dataproblems, idusuario, datalimite) {
     const submissoesAlunoAtual = [];
-  
+
     for (const { id, filename } of dataproblems.problems) {
       const submission = new Submission(token, id, idusuario, datalimite);
       const data = await submission.getSubmissions();
       const correctSubmissions = data.filter(({ evaluation }) => evaluation === "CORRECT");
-  
+
       if (correctSubmissions.length === 0) {
         continue; // Pule este problema se não houver submissões corretas
       }
-  
+
       const maxTries = Math.max(...correctSubmissions.map(({ tries }) => tries));
       const bestSubmissions = correctSubmissions.filter(({ tries }) => tries === maxTries);
       submissoesAlunoAtual.push(bestSubmissions);
     }
-  
+
     arraySubmissoesAluno.push(submissoesAlunoAtual);
     console.log(arraySubmissoesAluno);
   }
 
   async function obterSubmissoesProfessor(data) {
     const arraySubmissoesProfessor = [];
-    
+
     if (Array.isArray(data) && data) {
       const promises = data.map(async ({ id }) => {
         const submissionteacher = new SubmissionTeacher(token, id);
@@ -92,29 +94,29 @@ const Usuarios = () => {
     return arraySubmissoesProfessor;
   }
 
-  async function obterPontuacoes(token, submissionStudentData, submissionTeacherData, arrayProblemas, title) {
+  async function obterPontuacoes(index, token, submissionStudentData, submissionTeacherData, arrayProblemas, title) {
     const scoreData = [[]];
     const sourceCodeAlunosData = [];
 
-      for (let j = 0; j < submissionStudentData.length; j++) {
-        for (let k = 0; k < arrayProblemas.length; k++) {
-          if (submissionStudentData[j][0].problem.id === arrayProblemas[k].id) {
-            console.log("teste");
-            // let sourceCodeProfessorData;
-            const sourcecodeAluno = new SourceCode(token, submissionStudentData[j][0].id);
-            // const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[k][0].id);
+    for (let j = 0; j < submissionStudentData.length; j++) {
+      for (let k = 0; k < arrayProblemas.length; k++) {
+        sourceCodeAlunosData.push([]);
+        if (submissionStudentData[j][0].problem.id === arrayProblemas[k].id) {
+          console.log("teste");
+          const sourcecodeAluno = new SourceCode(token, submissionStudentData[j][0].id);
+          // const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[k][0].id);
 
-            await sourcecodeAluno.getSourceCode().then((data) => {
-              const array = 
-                {
-                  id: submissionStudentData[j][0].id, codigo: data
-                }
+          await sourcecodeAluno.getSourceCode().then((data) => {
+            const array =
+            {
+              id: submissionStudentData[j][0].id, codigo: data
+            }
 
-              sourceCodeAlunosData[k].push(array);
-            });
-          }
+            sourceCodeAlunosData[k].push(array);
+          });
         }
       }
+    }
     let sourceCodeProfessorData;
     const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[1][0].id);
     await sourcecodeProfessor.getSourceCode().then((data) => {
@@ -122,47 +124,63 @@ const Usuarios = () => {
     });
 
     const scoreSourceCodeData = [[]];
-    for (let l=0; l<arrayProblemas.lenght; l++) {
-      console.log("1");
-      const score = new ScoreSourceCode(arrayProblemas[l].id, sourceCodeAlunosData[l], sourceCodeProfessorData, arrayProblemas[l].name, idturma, idtarefa);
-      const pontuacao = await score.getScore();
-      console.log(pontuacao);
-      scoreSourceCodeData.push(pontuacao);
-      console.log(scoreSourceCodeData);
+    for (const problema of arrayProblemas) {
+      const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[arrayProblemas.indexOf(problema)], sourceCodeProfessorData, problema.name, idturma, idtarefa);
+
+      try {
+        const pontuacao = await score.getScore();
+
+        scoreSourceCodeData.push(pontuacao);
+      } catch {
+        console.error("errado aqui");
+      }
+
     }
+
+
+    toggleLoading(index);
   }
 
-  async function obterProblemas(userData) {  
+  function toggleLoading(index) {
+    const updatedLoading = [...loading];
+
+    updatedLoading[index] = !updatedLoading[index];
+    console.log("mudou");
+    setLoading(updatedLoading);
+  }
+
+
+  async function obterProblemas(userData) {
     const problems = new Problem(token, idtarefa, userData[0].id);
     const data = await problems.getProblems();
-  
+
     const jsonArray = data.problems;
-  
+
     const arraySubmissoesProfessor = await obterSubmissoesProfessor(jsonArray);
     console.log(arraySubmissoesProfessor);
-    for (const { id } of userData) {
-      const idusuario = id;
-      const submissoesAlunoAtual = [];
-  
-      for (const { id } of data.problems) {
-        const submission = new Submission(token, id, idusuario, datalimite);
-        const data = await submission.getSubmissions();
-        const correctSubmissions = data.filter(({ evaluation }) => evaluation === "CORRECT");
-    
-        if (correctSubmissions.length === 0) {
-          continue; // Pule este problema se não houver submissões corretas
-        }
-    
-        const maxTries = Math.max(...correctSubmissions.map(({ tries }) => tries));
-        const bestSubmissions = correctSubmissions.filter(({ tries }) => tries === maxTries);
-        submissoesAlunoAtual.push(bestSubmissions);
-      }
-      await obterPontuacoes(token, submissoesAlunoAtual, arraySubmissoesProfessor, data.problems, "teste");
+    for (const [index, { id }] of userData.entries()) {
+      obterPontuacoesCadaAluno(index, id, data, arraySubmissoesProfessor)
     }
-    // Após a conclusão da função obterPontuacoes, altere o estado de carregamento
-    setLoading(false);
   }
 
+  async function obterPontuacoesCadaAluno(index, idusuario, data, arraySubmissoesProfessor) {
+    const submissoesAlunoAtual = [];
+
+    for (const { id } of data.problems) {
+      const submission = new Submission(token, id, idusuario, datalimite);
+      const data = await submission.getSubmissions();
+      const correctSubmissions = data.filter(({ evaluation }) => evaluation === "CORRECT");
+
+      if (correctSubmissions.length === 0) {
+        continue;
+      }
+
+      const maxTries = Math.max(...correctSubmissions.map(({ tries }) => tries));
+      const bestSubmissions = correctSubmissions.filter(({ tries }) => tries === maxTries);
+      submissoesAlunoAtual.push(bestSubmissions);
+    }
+    await obterPontuacoes(index, token, submissoesAlunoAtual, arraySubmissoesProfessor, data.problems, "teste");
+  }
   return (
     <React.Fragment>
       <Navbar />
@@ -172,7 +190,7 @@ const Usuarios = () => {
         background: "white",
         alignItems: "center",
       }}>
-        <h2>{nometurma} {<KeyboardArrowRightIcon/>} {nometarefa}</h2>
+        <h2>{nometurma} {<KeyboardArrowRightIcon />} {nometarefa}</h2>
         <br></br>
         <Box>
           <Box style={{
@@ -185,14 +203,15 @@ const Usuarios = () => {
           }}>
           </Box>
           <div>
-            {userData.map(({ id, name}) => (
+            {userData.map(({ id, name },index) => (
               <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" onClick={() => acessarSubmissoes(id, token)}>
-                {loading ? (
+                {loading[index] ? (
                   <CircularProgress size={24} />
                 ) : (
                   <SendIcon />
                 )}
-              </ListItemButton>} style={{ padding: "5px",
+              </ListItemButton>} style={{
+                padding: "5px",
                 borderBottom: "1px solid black", borderLeft: "1px solid black", borderRight: "1px solid black",
               }}>
                 <AccountBoxIcon />
