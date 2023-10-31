@@ -3,6 +3,8 @@ import { Box, Container, ListItem, ListItemText, ListItemButton } from '@mui/mat
 import '../pages/css/Base.module.css'
 import Navbar from './components/Navbar';
 import Problem from '../services/Problem';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import SendIcon from '@mui/icons-material/Send';
 import { useNavigate } from 'react-router-dom';
 
 const Problemas = () => {
@@ -11,6 +13,11 @@ const Problemas = () => {
   const token = sessionStorage.getItem('token');
   const idtarefa = sessionStorage.getItem('idtarefa');
   const idusuario = sessionStorage.getItem('idusuario');
+  const nometarefa = sessionStorage.getItem('nometarefa');
+  const nometurma = sessionStorage.getItem('nometurma');
+  const nomealuno = sessionStorage.getItem('nomealuno');
+  const submissoesruins = sessionStorage.getItem('submissoesruins');
+  const submissoesboas = sessionStorage.getItem('submissoesboas');
   const problem = new Problem(token, idtarefa, idusuario);
   const navigate = useNavigate();
 
@@ -25,10 +32,9 @@ const Problemas = () => {
     }
   }, []);
 
-  function acessarSubmissoes(id, name, token) {
+  function acessarSubmissoes(id, name) {
     sessionStorage.setItem("idproblema", id);
-    sessionStorage.setItem("nomealuno", name);
-    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("nomeproblema", name);
     navigate("/submissoes");
   }
 
@@ -37,7 +43,7 @@ const Problemas = () => {
     return (
       <div key={id}>
         <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemText primary={"Pontuação: " + matchingScore.user_score} />} style={{ borderBottom: "1px solid black", borderLeft: "1px solid black", borderRight: "1px solid black", }}>
-          <ListItemButton component="a" onClick={() => acessarSubmissoes(id, name, token)}>
+          <ListItemButton component="a" onClick={() => acessarSubmissoes(id, name)}>
             <ListItemText primary={name} />
           </ListItemButton>
         </ListItem>
@@ -54,7 +60,7 @@ const Problemas = () => {
         background: "white",
         alignItems: "center",
       }}>
-        <h2>Problemas da Tarefa</h2>
+        <h2>{nometurma} {<KeyboardArrowRightIcon />} {nometarefa} {<KeyboardArrowRightIcon />} {nomealuno} </h2>
         <br></br>
         <Box>
           <Box style={{
