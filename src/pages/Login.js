@@ -43,7 +43,6 @@ function Login() {
   function handleLogin() {
     Auth(username, password)
       .then((resposta) => {
-        console.log(resposta);
         sessionStorage.setItem("token", resposta?.data.access_token);
         navigate("/turmas");
       })

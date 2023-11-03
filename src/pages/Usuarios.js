@@ -80,7 +80,6 @@ const Usuarios = () => {
           try {
             const data = await sourcecodeAluno.getSourceCode();
             if (data.length>0){
-              console.log("tamanho do data é " + data.length + "para o id " + submissionStudentData[j][0].id);
               const array = {
                 id: submissionStudentData[j][0].id,
                 codigo: data
@@ -149,8 +148,6 @@ const Usuarios = () => {
       }
     }
     else{
-      console.log(sourceCodeAlunosData);
-      console.log(submissionStudentData);
     }
   }
 
@@ -217,7 +214,6 @@ const Usuarios = () => {
     const submissoesAlunoAtual = await obterSubmissaoPorAluno(index, idusuario, data, arraySubmissoesProfessor);
 
     if (submissoesAlunoAtual.length > 0){
-      console.log(submissoesAlunoAtual.length)
       const pontuacao = await obterPontuacoes(index, token, submissoesAlunoAtual, arraySubmissoesProfessor, data.problems, "teste");
       try
       {
@@ -236,7 +232,6 @@ const Usuarios = () => {
         }
         else{
           toggleLoading(idusuario);
-          console.log(scoreSourceCodeData);
         }
       }catch{
         console.error("nao foi possivel ler a pontuacao")

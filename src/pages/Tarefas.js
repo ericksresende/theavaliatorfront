@@ -30,7 +30,6 @@ const Tarefas = () => {
     sessionStorage.setItem("idtarefa", id);
     sessionStorage.setItem("nometarefa", title);
     sessionStorage.setItem("datalimite", endDate);
-    console.log(endDate);
     navigate("/alunos");
   }
 

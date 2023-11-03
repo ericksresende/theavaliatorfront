@@ -20,8 +20,6 @@ class Quiz {
         this.url,
         this.config
       );
-      console.log(this.url);
-      console.log(response.data);
       return response.data;
   }
 }
