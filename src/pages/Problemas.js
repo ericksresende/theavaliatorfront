@@ -4,6 +4,7 @@ import '../pages/css/Base.module.css'
 import Navbar from './components/Navbar';
 import Problem from '../services/Problem';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import SendIcon from '@mui/icons-material/Send';
 import { useNavigate } from 'react-router-dom';
 
@@ -42,10 +43,16 @@ const Problemas = () => {
     const matchingScore = scoreData.find((score) => score.problem_id === id);
     return (
       <div key={id}>
-        <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemText primary={"Pontuação: " + matchingScore.user_score} />} style={{ borderBottom: "1px solid black", borderLeft: "1px solid black", borderRight: "1px solid black", }}>
-          <ListItemButton component="a" onClick={() => acessarSubmissoes(id, name)}>
-            <ListItemText primary={name} />
-          </ListItemButton>
+        <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" onClick={() => acessarSubmissoes(id, name)}>
+          <SendIcon />
+        </ListItemButton>} style={{
+          padding: "5px",
+          borderBottom: "1px solid black",
+          borderLeft: "1px solid black",
+          borderRight: "1px solid black",
+        }}>
+          <QuestionAnswerIcon />
+          <ListItemText primary={name} style={{ marginLeft: "5px" }} />
         </ListItem>
       </div>
     );
@@ -65,10 +72,11 @@ const Problemas = () => {
         <Box>
           <Box style={{
             background: "#243856",
-            padding: "25px",
+            padding: "20px",
             borderRadius: '10px',
             borderBottomLeftRadius: '0',
             borderBottomRightRadius: '0',
+            border: "1px solid black",
           }}>
           </Box>
           <div>

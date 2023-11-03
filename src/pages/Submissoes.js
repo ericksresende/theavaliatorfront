@@ -1,183 +1,130 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, ListItem, ListItemText, ListItemButton } from '@mui/material';
-import '../pages/css/Base.module.css'
+import { Container, Paper, Typography, Box, Button, Card, CardContent, Grid, Divider } from '@mui/material';
+import BasicCard from './components/Card';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import Navbar from './components/Navbar';
 import Submission from '../services/Submission';
 import SubmissionTeacher from '../services/SubmissionTeacher';
 import SourceCode from '../services/SourceCode';
-import ScoreSourceCode from '../services/ScoreSourceCode';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { useNavigate } from 'react-router-dom';
 
 const Submissoes = () => {
   const [submissionData, setSubmissionData] = useState([]);
-  const [scoreData, setScoreData] = useState([]);
-  const [sourceCodeData, setSourceCodeData] = useState([]);
+  const [sourceCodeData, setSourceCodeData] = useState('');
+  const [sourceCodeTeacherData, setSourceCodeTeacherData] = useState('');
   const token = sessionStorage.getItem('token');
   const idproblema = sessionStorage.getItem('idproblema');
   const nometarefa = sessionStorage.getItem('nometarefa');
   const nometurma = sessionStorage.getItem('nometurma');
   const nomealuno = sessionStorage.getItem('nomealuno');
-  const nomeproblema = sessionStorage.getItem("nomeproblema");
-  console.log(idproblema);
+  const nomeproblema = sessionStorage.getItem('nomeproblema');
   const idusuario = sessionStorage.getItem('idusuario');
   const datalimite = sessionStorage.getItem('datalimite');
   const submission = new Submission(token, idproblema, idusuario, datalimite);
   const submissionteacher = new SubmissionTeacher(token, idproblema);
-  const navigate = useNavigate();
-
-  if (!sessionStorage.getItem('token')) {
-    // Redirecione o usuário para a página de login ou exiba uma mensagem de erro
-    navigate("/");
-  }
-
-  function acessarPontuacoes(id, name, token) {
-    sessionStorage.setItem("idsubmissao", id);
-    sessionStorage.setItem("nomealuno", name);
-    sessionStorage.setItem("token", token);
-    navigate("/pontuacoes");
-  }
-
-  const [loadingSourceCode, setLoadingSourceCode] = useState(true); // Adicione este estado local
 
   useEffect(() => {
     submission.getSubmissions()
       .then((data) => {
         const maxTries = Math.max(...data.map(({ tries }) => tries));
         const bestSubmissions = data.filter(({ tries }) => tries === maxTries);
-        const sourcecodeAluno = new SourceCode(token, bestSubmissions[0].id);
-        sourcecodeAluno.getSourceCode()
-          .then((codigo) => {
-            setSourceCodeData(codigo);
-            setLoadingSourceCode(false); // Marque o carregamento como concluído
-          })
-          .catch((error) => {
-            console.error('Erro ao buscar o código-fonte', error);
-          });
-          // const score = new ScoreSourceCode(idproblema, codigo, codigoProfessor, nomeProblema, idturma, idtarefa)
         setSubmissionData(bestSubmissions);
+
+        const firstCorrectSubmission = bestSubmissions.find(({ evaluation }) => evaluation === 'CORRECT');
+
+        if (firstCorrectSubmission) {
+          const sourcecodeAluno = new SourceCode(token, firstCorrectSubmission.id);
+          sourcecodeAluno.getSourceCode()
+            .then((codigo) => {
+              setSourceCodeData(codigo);
+            })
+            .catch((error) => {
+              console.error('Erro ao buscar o código-fonte do aluno', error);
+            });
+
+          submissionteacher.getSubmissions()
+            .then((teacherData) => {
+              const firstCorrectSubmissionTeacher = teacherData.find(({ evaluation }) => evaluation === 'CORRECT');
+              if (firstCorrectSubmissionTeacher) {
+                const sourcecodeTeacher = new SourceCode(token, firstCorrectSubmissionTeacher.id);
+                sourcecodeTeacher.getSourceCode()
+                  .then((codigo) => {
+                    setSourceCodeTeacherData(codigo);
+                  })
+                  .catch((error) => {
+                    console.error('Erro ao buscar o código-fonte do professor', error);
+                  });
+              }
+            });
+        }
       });
   }, []);
 
-  useEffect(() => {
-    if (sourceCodeData.length > 0) {
-      console.log("Dados do código-fonte atualizados:", sourceCodeData);
-      
-      // Agora você pode realizar qualquer ação ou lógica que precisa com sourceCodeData.
-      // Por exemplo, chame sua função ScoreSourceCode ou outras funções aqui.
-    }
-  }, [sourceCodeData]);
-
-  // useEffect(() => {
-  //   if (sourceCodeTeacherData.length > 0) {
-  //     console.log("Dados do código-fonte do professor atualizados:", sourceCodeTeacherData);
-      
-  //     // Faça o que precisa ser feito com sourceCodeTeacherData aqui.
-  //   }
-  // }, [sourceCodeTeacherData]);
-
-  // const handleSourceCodeClick = (token, idsubmissao, submissionTeacherData, title) => {
-  //   // Crie uma instância de SourceCode com base no ID clicado
-  //   const sourcecode = new SourceCode(token, idsubmissao);
-    
-  //   // Chame a função getsourcecode da instância sourcecode
-  //   sourcecode.getSourceCode().then((data) =>{
-  //     setSourceCodeData(data);
-  //     console.log(data);
-  //   }); // Certifique-se de implementar essa função
-
-  //   const firstCorrectSubmission = submissionTeacherData.find(({ evaluation }) => evaluation === "CORRECT");
-
-  //   if (firstCorrectSubmission) {
-  //     // Aqui, firstCorrectSubmission contém o primeiro item de evaluate que é "CORRECT"
-  //     const sourcecodeteacher = new SourceCode(token, firstCorrectSubmission.id);
-  //     sourcecodeteacher.getSourceCode().then((data) =>{
-  //       setSourceCodeTeacherData(data);
-  //       console.log(data);
-  //       console.log("PROFESSOR");
-  //     });
-  //   } else {
-  //     // Se não houver nenhum item com evaluation igual a "CORRECT"
-  //     console.log("Nenhum item com evaluation igual a 'CORRECT' encontrado.");
-  //   }
-
-  //   const score = new ScoreSourceCode(idproblema, idsubmissao, sourceCodeData, sourceCodeTeacherData, title);
-  //   const pontuacao = score.getScore();
-  //   console.log(pontuacao);
-
-  //   // Chame a função acessarPontuacoes para redirecionar para a página de pontuações
-  //   // acessarPontuacoes(id, name, token);
-  // };
+  const submissionDataExample = {
+    id: 1,
+    name: 'Nome do Aluno',
+    code: 'Código-fonte da submissão aqui',
+    scores: {
+      cyclomaticComplexity: '5',
+      exceededLimitCC: 'NO',
+      linesOfCode: '12',
+      exceededLimitLOC: 'NO',
+      logicalLinesOfCode: '11',
+      exceededLimitLLOC: 'NO',
+      sourceLinesOfCode: '11',
+      limitSLOC: 'NO',
+      finalScore: '104.8',
+    },
+  };
 
   return (
-    <React.Fragment>
+    <div>
       <Navbar />
-      <Container style={{
-        width: "100vw",
-        height: "100vh",
-        background: "white",
-        alignItems: "center",
-      }}>
-        <h2>{nometurma} {<KeyboardArrowRightIcon />} {nometarefa} {<KeyboardArrowRightIcon />} {nomealuno} {<KeyboardArrowRightIcon />} {nomeproblema} </h2>
-        <br></br>
-        <Box>
-          <Box style={{
-            background: "#243856",
-            padding: "25px",
-            borderRadius: '10px',
-            borderBottomLeftRadius: '0',
-            borderBottomRightRadius: '0',
-          }}>
-          </Box>
-          <div>
-            {submissionData
-              .filter(({ evaluation }) => evaluation === "CORRECT")
-              .map(({ id, evaluation, filename }) => (
-                <ListItem
-                  key={id}
-                  component="div"
-                  disablePadding
-                  secondaryAction={<ListItemText primary={"Status: " + evaluation} />}
-                  style={{
-                    borderBottom: "1px solid black",
-                    borderLeft: "1px solid black",
-                    borderRight: "1px solid black",
-                  }}
-                >
-                  <ListItemButton component="a">
-                    <ListItemText primary={"Submissão " + id} />
-                  </ListItemButton>
-                </ListItem>
-              ))
-            }
-            <ListItem
-              key={2}
-              component="div"
-              disablePadding
-              style={{
-                backgroundColor: "black",
-                color: "white",
-                borderBottom: "1px solid black",
-                borderLeft: "1px solid black",
-                borderRight: "1px solid black",
-              }}
-            >
-              {loadingSourceCode ? (
-                <>
-                <ListItemButton component="a">
-                  <ListItemText primary={"Carregando código..."} />
-                </ListItemButton>
-                </>
-              ) : (
-                <>
-                <ListItemText > <code>{sourceCodeData}</code></ListItemText>
-                </>
-              )}
-            </ListItem>
-          </div>
+      <Container>
+        <h2>
+          {nometurma} <KeyboardArrowRightIcon /> {nometarefa} <KeyboardArrowRightIcon /> {nomealuno} <KeyboardArrowRightIcon /> {nomeproblema}
+        </h2>
+        <Box mt={2}>
+          <Paper elevation={3} style={{ marginBottom: '20px', padding: '16px' }}>
+          <Typography variant="h5" component="div">
+            Submissão ID: {submissionData.length > 0 ? submissionData[0].id : 'Carregando ID...'}
+          </Typography>
+            <Divider />
+            <Grid container spacing={1}>
+              <Grid item xs={12}>
+                <Box display="flex" justifyContent="space-between" p={2}>
+                  <BasicCard text="Cyclomatic Complexity" value = {submissionDataExample.scores.cyclomaticComplexity} exceedlimit = {submissionDataExample.scores.exceededLimitCC}/>
+                  <BasicCard text="Lines of Code" value = {submissionDataExample.scores.linesOfCode} exceedlimit = {submissionDataExample.scores.exceededLimitLOC}/>
+                  <BasicCard text="Logical Lines of Code" value = {submissionDataExample.scores.logicalLinesOfCode} exceedlimit = {submissionDataExample.scores.exceededLimitLLOC}/>
+                  <BasicCard text="Source Lines of Code" value = {submissionDataExample.scores.sourceLinesOfCode} exceedlimit = {submissionDataExample.scores.limitSLOC}/>
+                  <BasicCard text="Final Score" value = {submissionDataExample.scores.finalScore}/>
+
+
+
+
+                </Box>
+              </Grid>
+            </Grid>
+            <Divider />
+            <pre style={{ whiteSpace: 'pre-wrap', padding: '10px' }}>
+              <Typography variant="h5" component="div">
+                Código-fonte do Aluno
+              </Typography>
+              <pre style={{ whiteSpace: 'pre-wrap', padding: '10px', fontSize:'15px',}}>
+                {sourceCodeData || 'Carregando código...'}
+              </pre>
+            </pre>
+          </Paper>
         </Box>
+        <Paper elevation={3} style={{ marginBottom: '20px', padding: '16px', fontSize:'15px', }}>
+          <Typography variant="h5" component="div">
+            Código-fonte do Professor
+          </Typography>
+          <pre style={{ whiteSpace: 'pre-wrap', padding: '10px' }}>
+            {sourceCodeTeacherData || 'Carregando código...'}
+          </pre>
+        </Paper>
       </Container>
-    </React.Fragment>
+    </div>
   );
 }
 
