@@ -64,7 +64,7 @@ const Submissoes = () => {
             }];
             const score = new ScoreSourceCode(idproblema, alunoinfos, sourceCodeTeacherData, nomeproblema, idturma, idtarefa);
             const pontuacao = await score.getScore();
-            setPontuacao(pontuacao);
+            setPontuacao(pontuacao[0]);
             setPontuacaoCarregando(false);
           }
            else {
@@ -120,12 +120,11 @@ const Submissoes = () => {
             <Grid container spacing={1}>
               <Grid item xs={12}>
               <Box display="flex" justifyContent="space-between" p={2}>
-                {console.log(pontuacao ? pontuacao : "Carregando pontuações")}
-                <BasicCard text="Cyclomatic Complexity" value={pontuacao ? pontuacao[0]['cyclomaticComplexity'] : "Carregando..."} exceedlimit={pontuacao ? pontuacao[0]['exceededLimitCC'] : "Carregando..."} />
-                <BasicCard text="Lines of Code" value={pontuacao ? pontuacao[0]['linesOfCode'] : "Carregando..."} exceedlimit={pontuacao ? pontuacao[0]['exceededLimitLOC'] : "Carregando..."} />
-                <BasicCard text="Logical Lines of Code" value={pontuacao ? pontuacao[0]['logicalLinesOfCode'] : "Carregando..."} exceedlimit={pontuacao ? pontuacao[0]['exceededLimitLLOC'] : "Carregando..."} />
-                <BasicCard text="Source Lines of Code" value={pontuacao ? pontuacao[0]['sourceLinesOfCode'] : "Carregando..."} exceedlimit={pontuacao ? pontuacao[0]['limitSLOC'] : "Carregando..."} />
-                <BasicCard text="Final Score" value={pontuacao ? pontuacao[0]['finalScore'] : "Carregando..."} />
+                <BasicCard text="Cyclomatic Complexity" value={pontuacao ? pontuacao.cyclomaticComplexity : "Carregando..."} exceedlimit={pontuacao ? pontuacao.exceededLimitCC : "Carregando..."} />
+                <BasicCard text="Lines of Code" value={pontuacao ? pontuacao.linesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao.exceededLimitLOC : "Carregando..."} />
+                <BasicCard text="Logical Lines of Code" value={pontuacao ? pontuacao.logicalLinesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao.exceededLimitLLOC : "Carregando..."} />
+                <BasicCard text="Source Lines of Code" value={pontuacao ? pontuacao.sourceLinesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao.limitSLOC : "Carregando..."} />
+                <BasicCard text="Final Score" value={pontuacao ? pontuacao.finalScore : "Carregando..."} />
               </Box>
               </Grid>
             </Grid>
@@ -146,14 +145,6 @@ const Submissoes = () => {
           </Typography>
           <pre style={{ whiteSpace: 'pre-wrap', padding: '10px' }}>
             {sourceCodeTeacherData || 'Carregando código...'}
-          </pre>
-        </Paper>
-        <Paper elevation={3} style={{ marginBottom: '20px', padding: '16px', fontSize: '15px' }}>
-          <Typography variant="h5" component="div">
-            Pontuação
-          </Typography>
-          <pre style={{ whiteSpace: 'pre-wrap', padding: '10px' }}>
-            {pontuacaoCarregando ? 'Carregando pontuação...' : (pontuacao !== null ? pontuacao : 'Pontuação não disponível')}
           </pre>
         </Paper>
       </Container>
