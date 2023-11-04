@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, ListItem, ListItemText, ListItemButton } from '@mui/material';
-import '../pages/css/Base.module.css'
+import { Box, Container, ListItem, ListItemText, ListItemButton, Typography } from '@mui/material';
+import '../pages/css/Base.module.css';
 import Navbar from './components/Navbar';
 import Problem from '../services/Problem';
+import Submission from '../services/Submission';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import SendIcon from '@mui/icons-material/Send';
@@ -11,14 +12,16 @@ import { useNavigate } from 'react-router-dom';
 const Problemas = () => {
   const [problemData, setProblemData] = useState([]);
   const [scoreData, setScoreData] = useState([]);
+  const [submissionsStatus, setSubmissionsStatus] = useState([]); // Adicionamos um estado para o status das submissões
   const token = sessionStorage.getItem('token');
   const idtarefa = sessionStorage.getItem('idtarefa');
   const idusuario = sessionStorage.getItem('idusuario');
+  const datalimite = sessionStorage.getItem('datalimite');
   const nometarefa = sessionStorage.getItem('nometarefa');
   const nometurma = sessionStorage.getItem('nometurma');
   const nomealuno = sessionStorage.getItem('nomealuno');
-  const submissoesruins = sessionStorage.getItem('submissoesruins');
-  const submissoesboas = sessionStorage.getItem('submissoesboas');
+  const submissoesruins = JSON.parse(sessionStorage.getItem('ruins'));
+  const submissoesboas = JSON.parse(sessionStorage.getItem('boas'));
   const problem = new Problem(token, idtarefa, idusuario);
   const navigate = useNavigate();
 
@@ -33,30 +36,39 @@ const Problemas = () => {
     }
   }, []);
 
+  useEffect(() => {
+    async function fetchSubmissionsStatus() {
+      if (problemData.length === 0) {
+        // Verifique se problemData está vazio e retorne se for o caso
+        return;
+      }
+
+      const submissionStatusPromises = problemData.map(({ id }) => {
+        return new Submission(token, id, idusuario, datalimite)
+          .getSubmissions()
+          .then((data) => {
+            const maxTries = Math.max(...data.map(({ tries }) => tries));
+            const bestSubmissions = data.filter(({ tries }) => tries === maxTries);
+            const firstCorrectSubmission = bestSubmissions.find(({ evaluation }) => evaluation === 'CORRECT');
+            const isBoa = submissoesboas.indexOf(firstCorrectSubmission.id) !== -1;
+            const isRuim = submissoesruins.indexOf(firstCorrectSubmission.id) !== -1;
+
+            return { id, isBoa, isRuim };
+          });
+      });
+
+      const results = await Promise.all(submissionStatusPromises);
+      setSubmissionsStatus(results);
+    }
+
+    fetchSubmissionsStatus();
+  }, [problemData, submissoesboas, submissoesruins]);
+
   function acessarSubmissoes(id, name) {
     sessionStorage.setItem("idproblema", id);
     sessionStorage.setItem("nomeproblema", name);
     navigate("/submissoes");
   }
-
-  const combinedListItems = problemData.map(({ id, name }) => {
-    const matchingScore = scoreData.find((score) => score.problem_id === id);
-    return (
-      <div key={id}>
-        <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" onClick={() => acessarSubmissoes(id, name)}>
-          <SendIcon />
-        </ListItemButton>} style={{
-          padding: "5px",
-          borderBottom: "1px solid black",
-          borderLeft: "1px solid black",
-          borderRight: "1px solid black",
-        }}>
-          <QuestionAnswerIcon />
-          <ListItemText primary={name} style={{ marginLeft: "5px" }} />
-        </ListItem>
-      </div>
-    );
-  });
 
   return (
     <React.Fragment>
@@ -80,7 +92,38 @@ const Problemas = () => {
           }}>
           </Box>
           <div>
-            {combinedListItems}
+            {problemData.map(({ id, name }, index) => (
+              <div key={id}>
+                <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" onClick={() => acessarSubmissoes(id, name)}>
+                {submissionsStatus[index] && submissionsStatus[index].isRuim ? (
+                          <>
+                          <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA</Typography>
+                          <SendIcon onClick={() => acessarSubmissoes(id, name)}/>
+                          </>
+                        )
+                        : submissionsStatus[index] && submissionsStatus[index].isBoa ? (
+                          <>
+                          <Typography variant="body2" color="blue">PONTUAÇÃO ALTA</Typography>
+                          <SendIcon onClick={() => acessarSubmissoes(id, name)}/>
+                          </>
+                        )
+                        : (
+                          <>
+                          <Typography variant="body2" color="green">OK</Typography>
+                          <SendIcon onClick={() => acessarSubmissoes(id, name)}/>
+                          </>
+                        )}
+                </ListItemButton>} style={{
+                  padding: "5px",
+                  borderBottom: "1px solid black",
+                  borderLeft: "1px solid black",
+                  borderRight: "1px solid black",
+                }}>
+                  <QuestionAnswerIcon />
+                  <ListItemText primary={name} style={{ marginLeft: "5px" }} />
+                </ListItem>
+              </div>
+            ))}
           </div>
         </Box>
       </Container>
