@@ -50,9 +50,13 @@ const Problemas = () => {
             const maxTries = Math.max(...data.map(({ tries }) => tries));
             const bestSubmissions = data.filter(({ tries }) => tries === maxTries);
             const firstCorrectSubmission = bestSubmissions.find(({ evaluation }) => evaluation === 'CORRECT');
-            const isBoa = submissoesboas.indexOf(firstCorrectSubmission.id) !== -1;
-            const isRuim = submissoesruins.indexOf(firstCorrectSubmission.id) !== -1;
-
+            console.log(firstCorrectSubmission);
+            let isBoa;
+            let isRuim;
+            if (firstCorrectSubmission){
+              isBoa = submissoesboas.indexOf(firstCorrectSubmission.id) !== -1;
+              isRuim = submissoesruins.indexOf(firstCorrectSubmission.id) !== -1;
+            }
             return { id, isBoa, isRuim };
           });
       });

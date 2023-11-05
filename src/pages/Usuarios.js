@@ -65,8 +65,6 @@ const Usuarios = () => {
     sessionStorage.setItem('nomealuno', nome);
     sessionStorage.setItem('ruins', JSON.stringify(ruins));
     sessionStorage.setItem('boas', JSON.stringify(boas));
-    console.log(boas);
-    console.log(ruins);
     navigate('/problemas');
   }
 
@@ -126,6 +124,7 @@ const Usuarios = () => {
 
     const sourceCodeProfessorData = [];
     for (const [index, submissao] of submissionTeacherData.entries()) {
+      console.log(submissionTeacherData);
       const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[index][0].id);
       await sourcecodeProfessor.getSourceCode().then((data) => {
         sourceCodeProfessorData.push(data);
@@ -148,6 +147,25 @@ const Usuarios = () => {
 
       return scoreSourceCodeData; // Retorna todas as pontuações após o loop ter sido completamente executado
     } else {
+      const scoreSourceCodeDataDiferente = [];
+      for (let i = 0; i < arrayProblemas.length; i++) {
+        const problema = arrayProblemas[i];
+        for (let j = 0; j < submissionStudentData.length; j++) {
+          const submissionStudent = submissionStudentData[j];
+          if (problema.id === submissionStudent[0].problem.id) {
+            const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[j], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa);
+            try {
+              const pontuacao = await score.getScore();
+              console.log(pontuacao);
+              scoreSourceCodeDataDiferente.push(pontuacao);
+            } catch (error) {
+              console.error(scoreSourceCodeDataDiferente);
+            }
+          }
+        }
+      }
+      console.log(scoreSourceCodeDataDiferente);
+      return scoreSourceCodeDataDiferente;
     }
   }
 
@@ -217,7 +235,7 @@ const Usuarios = () => {
       try {
         for (let i = 0; i < pontuacao.length; i++) {
           const pontuacaonumero = parseFloat(pontuacao[i][0].finalScore);
-          if (pontuacaonumero < 95.0) {
+          if (pontuacaonumero < 88.0) {
             toggleWarning(idusuario);
             setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
           } else if (pontuacaonumero > 100.0) {
@@ -230,6 +248,7 @@ const Usuarios = () => {
         }
       } catch {
         console.error("nao foi possivel ler a pontuacao")
+        console.error(submissoesAlunoAtual);
       }
     } else {
       toggleLoading(idusuario);
@@ -264,7 +283,7 @@ const Usuarios = () => {
                   <CircularProgress size={24} />
                 ) :
                   error[id] ? (
-                    <Typography variant="body2" color="error">ERRO AO OBTER PONTUAÇÕES </Typography>
+                    <Typography variant="body2" color="error">SEM SUBMISSÕES </Typography>
                   )
                   : warning[id] ? (
                     <>
