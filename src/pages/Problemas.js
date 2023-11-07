@@ -22,6 +22,8 @@ const Problemas = () => {
   const nomealuno = sessionStorage.getItem('nomealuno');
   const submissoesruins = JSON.parse(sessionStorage.getItem('ruins'));
   const submissoesboas = JSON.parse(sessionStorage.getItem('boas'));
+  const submissoesnormais = JSON.parse(sessionStorage.getItem('normais'));
+  console.log(submissoesnormais);
   const problem = new Problem(token, idtarefa, idusuario);
   const navigate = useNavigate();
 
@@ -53,11 +55,13 @@ const Problemas = () => {
             console.log(firstCorrectSubmission);
             let isBoa;
             let isRuim;
+            let isNormal;
             if (firstCorrectSubmission){
               isBoa = submissoesboas.indexOf(firstCorrectSubmission.id) !== -1;
               isRuim = submissoesruins.indexOf(firstCorrectSubmission.id) !== -1;
+              isNormal = submissoesnormais.indexOf(firstCorrectSubmission.id) !== -1;
             }
-            return { id, isBoa, isRuim };
+            return { id, isBoa, isRuim, isNormal };
           });
       });
 
@@ -98,7 +102,7 @@ const Problemas = () => {
           <div>
             {problemData.map(({ id, name }, index) => (
               <div key={id}>
-                <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" onClick={() => acessarSubmissoes(id, name)}>
+                <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" >
                 {submissionsStatus[index] && submissionsStatus[index].isRuim ? (
                           <>
                           <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA</Typography>
@@ -111,11 +115,13 @@ const Problemas = () => {
                           <SendIcon onClick={() => acessarSubmissoes(id, name)}/>
                           </>
                         )
-                        : (
+                        : submissionsStatus[index] && submissionsStatus[index].isNormal ? (
                           <>
                           <Typography variant="body2" color="green">OK</Typography>
                           <SendIcon onClick={() => acessarSubmissoes(id, name)}/>
                           </>
+                        ) : (
+                          <Typography variant="body2" color="error">SEM CÁLCULO</Typography>
                         )}
                 </ListItemButton>} style={{
                   padding: "5px",

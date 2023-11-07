@@ -26,10 +26,12 @@ const Usuarios = () => {
   const [userData, setUserData] = useState([]);
   const [loading, setLoading] = useState({}); // Inicialmente, o estado de carregamento está definido como verdadeiro
   const [error, setError] = useState({}); // Inicialmente, o estado de carregamento está definido como verdadeiro
+  const [errorCalculo, setErrorCalculo] = useState({});
   const [warning, setWarning] = useState({}); // Inicialmente, o estado de carregamento está definido como verdadeiro
   const [goodwarning, setGoodWarning] = useState({});
   const [submissoesruins, setSubmissoesRuins] = useState([]);
   const [submissoesboas, setSubmissoesBoas] = useState([]);
+  const [submissoesnormais, setSubmissoesNormais] = useState([]);
   const arraySubmissoesAluno = [];
   const arrayPontuacoes = [];
 
@@ -39,6 +41,7 @@ const Usuarios = () => {
   const datalimite = sessionStorage.getItem('datalimite');
   const nometurma = sessionStorage.getItem('nometurma');
   const idturma = sessionStorage.getItem('idturma');
+  const dadosusuario = sessionStorage.getItem('dadosusuario');
 
   const user = new User(token, idtarefa);
   const navigate = useNavigate();
@@ -56,15 +59,20 @@ const Usuarios = () => {
           loadingState[user.id] = true; // Inicialize o estado de carregamento para cada usuário
         });
         setLoading(loadingState);
+        sessionStorage.setItem('dadosusuario', userData);
+        sessionStorage.setItem('dadoswarning', warning);
+        sessionStorage.setItem('dadosusuario', userData);
+        console.log("dados salvos");
       });
     }
   }, []);
 
-  function acessarSubmissoes(id, nome, ruins, boas) {
+  function acessarSubmissoes(id, nome, ruins, boas, normais) {
     sessionStorage.setItem('idusuario', id);
     sessionStorage.setItem('nomealuno', nome);
     sessionStorage.setItem('ruins', JSON.stringify(ruins));
     sessionStorage.setItem('boas', JSON.stringify(boas));
+    sessionStorage.setItem('normais', JSON.stringify(normais));
     navigate('/problemas');
   }
 
@@ -131,6 +139,7 @@ const Usuarios = () => {
       });
     }
 
+    const arrayerros = [];
     if (submissionStudentData.length == arrayProblemas.length) {
       const scoreSourceCodeData = []; // Crie um array para armazenar as pontuações
 
@@ -140,11 +149,12 @@ const Usuarios = () => {
         try {
           const pontuacao = await score.getScore();
           scoreSourceCodeData.push(pontuacao);
+          arrayerros.push("erro");
         } catch (error) {
           console.error(sourceCodeAlunosData);
+          console.log(arrayerros);
         }
       }
-
       return scoreSourceCodeData; // Retorna todas as pontuações após o loop ter sido completamente executado
     } else {
       const scoreSourceCodeDataDiferente = [];
@@ -158,8 +168,10 @@ const Usuarios = () => {
               const pontuacao = await score.getScore();
               console.log(pontuacao);
               scoreSourceCodeDataDiferente.push(pontuacao);
+              arrayerros.push("erro");
             } catch (error) {
               console.error(scoreSourceCodeDataDiferente);
+              console.log(arrayerros);
             }
           }
         }
@@ -180,6 +192,13 @@ const Usuarios = () => {
     setError((prevError) => ({
       ...prevError,
       [userId]: !prevError[userId], // Altera o estado de aviso para um ID de usuário específico
+    }));
+  }
+
+  function toggleErrorCalculo(userId) {
+    setErrorCalculo((prevErrorCalculo) => ({
+      ...prevErrorCalculo,
+      [userId]: !prevErrorCalculo[userId], // Altera o estado de aviso para um ID de usuário específico
     }));
   }
 
@@ -232,15 +251,29 @@ const Usuarios = () => {
 
     if (submissoesAlunoAtual.length > 0) {
       const pontuacao = await obterPontuacoes(index, token, submissoesAlunoAtual, arraySubmissoesProfessor, data.problems, "teste");
+      if (pontuacao.length === 0){
+        console.log("caiu aqui");
+        toggleErrorCalculo(idusuario);
+        toggleLoading(idusuario);
+      }
       try {
         for (let i = 0; i < pontuacao.length; i++) {
           const pontuacaonumero = parseFloat(pontuacao[i][0].finalScore);
           if (pontuacaonumero < 88.0) {
             toggleWarning(idusuario);
+            console.log("salvando ruim");
+            console.log(pontuacaonumero);
             setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
           } else if (pontuacaonumero > 100.0) {
             toggleGoodWarning(idusuario);
+            console.log("salvando boa");
+            console.log(pontuacaonumero);
             setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+          }
+          else if (pontuacaonumero > 88.0 && pontuacaonumero < 100.0) {
+            console.log("salvando normal");
+            console.log(pontuacaonumero);
+            setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
           }
           if (i === pontuacao.length - 1) {
             toggleLoading(idusuario);
@@ -285,22 +318,26 @@ const Usuarios = () => {
                   error[id] ? (
                     <Typography variant="body2" color="error">SEM SUBMISSÕES </Typography>
                   )
+                  :
+                  errorCalculo[id] ? (
+                    <Typography variant="body2" color="error">ERRO NO CÁLCULO DAS PONTUAÇÕES </Typography>
+                  )
                   : warning[id] ? (
                     <>
                       <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA</Typography>
-                      <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas)} />
+                      <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
                     </>
                   )
                     : goodwarning[id] ? (
                       <>
                         <Typography variant="body2" color="blue">PONTUAÇÃO ALTA </Typography>
-                        <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas)} />
+                        <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
                       </>
                     )
                     : (
                       <>
                         <Typography variant="body2" color="green">OK</Typography>
-                        <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas)} />
+                        <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
                       </>
                     )}
               </ListItemButton>} style={{
