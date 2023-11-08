@@ -133,10 +133,16 @@ const Usuarios = () => {
     const sourceCodeProfessorData = [];
     for (const [index, submissao] of submissionTeacherData.entries()) {
       console.log(submissionTeacherData);
-      const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[index][0].id);
-      await sourcecodeProfessor.getSourceCode().then((data) => {
-        sourceCodeProfessorData.push(data);
-      });
+      try{
+        const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[index][0].id);
+        await sourcecodeProfessor.getSourceCode().then((data) => {
+          sourceCodeProfessorData.push(data);
+        });
+      }
+      catch (error) {
+        console.error(sourceCodeAlunosData);
+        console.log(arrayerros);
+      }
     }
 
     const arrayerros = [];
