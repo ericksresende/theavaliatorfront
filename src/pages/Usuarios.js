@@ -73,7 +73,7 @@ const Usuarios = () => {
     sessionStorage.setItem('ruins', JSON.stringify(ruins));
     sessionStorage.setItem('boas', JSON.stringify(boas));
     sessionStorage.setItem('normais', JSON.stringify(normais));
-    navigate('/problemas');
+    window.open('/problemas', '_blank');
   }
 
   async function obterSubmissoes(index, token, submissionStudentData, submissionTeacherData, arrayProblemas, title) {

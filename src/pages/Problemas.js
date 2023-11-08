@@ -75,7 +75,7 @@ const Problemas = () => {
   function acessarSubmissoes(id, name) {
     sessionStorage.setItem("idproblema", id);
     sessionStorage.setItem("nomeproblema", name);
-    navigate("/submissoes");
+    window.open('/submissoes', '_blank');
   }
 
   return (
