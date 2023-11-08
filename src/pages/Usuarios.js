@@ -141,7 +141,6 @@ const Usuarios = () => {
       }
       catch (error) {
         console.error(sourceCodeAlunosData);
-        console.log(arrayerros);
       }
     }
 
