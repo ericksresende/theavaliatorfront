@@ -131,7 +131,7 @@ const Usuarios = () => {
     const sourceCodeAlunosData = await obterSubmissoes(index, token, submissionStudentData, submissionTeacherData, arrayProblemas, title);
 
     const sourceCodeProfessorData = [];
-    for (const [index, submissao] of submissionTeacherData.entries()) {
+    for (const [index] of submissionTeacherData.entries()) {
       console.log(submissionTeacherData);
       try{
         const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[index][0].id);
@@ -149,7 +149,7 @@ const Usuarios = () => {
       const scoreSourceCodeData = []; // Crie um array para armazenar as pontuações
 
       for (const [index, problema] of arrayProblemas.entries()) {
-        const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[index], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa);
+        const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[index], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[0].user.id);
 
         try {
           const pontuacao = await score.getScore();
@@ -326,6 +326,13 @@ const Usuarios = () => {
                   :
                   errorCalculo[id] ? (
                     <Typography variant="body2" color="error">ERRO NO CÁLCULO DAS PONTUAÇÕES </Typography>
+                  ) : warning[id] && goodwarning[id] ? (
+                    <>
+                      <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA </Typography>
+                      <Typography variant="body2" color="black">&</Typography>
+                      <Typography variant="body2" color="blue">PONTUAÇÃO ALTA </Typography>
+                      <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
+                    </>
                   )
                   : warning[id] ? (
                     <>

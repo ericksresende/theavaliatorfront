@@ -2,8 +2,8 @@
 import axios from 'axios';
 
 class ScoreSourceCode {
-  constructor(idproblema, codigoAluno, codigoProfessor, nomeProblema, idturma, idtarefa) {
-    this.urlsource = `https://bancotheavaliator-316d4dc95349.herokuapp.com/api/avaliarsubmissoes?idTurma=${idturma}&idTarefa=${idtarefa}`;
+  constructor(idproblema, codigoAluno, codigoProfessor, nomeProblema, idturma, idtarefa, idprofessor) {
+    this.urlsource = `https://bancotheavaliator-316d4dc95349.herokuapp.com/api/avaliarsubmissoes?idTurma=${idturma}&idTarefa=${idtarefa}&idProfessor=${idprofessor}`;
     this.configsource = {
         headers: {
           'Content-Type': 'application/json',
