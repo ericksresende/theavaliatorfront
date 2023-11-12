@@ -58,11 +58,12 @@ const Submissoes = () => {
           
           // Fora do bloco anterior, verifique se os códigos foram carregados
           if (codesLoaded) {
+            console.log(firstCorrectSubmissionTeacher);
             const alunoinfos = [{
               id: firstCorrectSubmission.id,
               codigo: sourceCodeData,
             }];
-            const score = new ScoreSourceCode(idproblema, alunoinfos, sourceCodeTeacherData, nomeproblema, idturma, idtarefa, firstCorrectSubmissionTeacher[0].user.id);
+            const score = new ScoreSourceCode(idproblema, alunoinfos, sourceCodeTeacherData, nomeproblema, idturma, idtarefa, firstCorrectSubmissionTeacher.user.id);
             const pontuacao = await score.getScore();
             setPontuacao(pontuacao);
             setPontuacaoCarregando(false);
