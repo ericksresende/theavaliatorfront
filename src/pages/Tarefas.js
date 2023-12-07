@@ -33,7 +33,7 @@ const Tarefas = () => {
     navigate("/alunos");
   }
 
-  const quizListItems = quizData.map(({ id, title, endDate }) => (
+  const quizListItems = quizData.length === 0 ? (<ListItem style={{color: "red", fontSize: "18px", border: "1px solid black"}}>Sem tarefas cadastradas na turma</ListItem>) : (quizData.map(({ id, title, endDate }) => (
     <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" onClick={() => acessarProblema(id, title, endDate)}>
       <SendIcon />
     </ListItemButton>} style={{
@@ -45,7 +45,7 @@ const Tarefas = () => {
       <QuizIcon />
       <ListItemText primary={title} style={{ marginLeft: "5px" }} />
     </ListItem>
-  ));
+  )));
 
   return (
     <React.Fragment>

@@ -56,7 +56,9 @@ const Turmas = () => {
             }}>
             </Box>
             <div>
-              {classesData.map(({ id, name}) => (
+              {classesData.length === 0 ? (
+              <ListItem variant="body2" style={{color: "red", fontSize: "18px", border: "1px solid black"}}>Nenhuma turma encontrada</ListItem>
+            ) : (classesData.map(({ id, name}) => (
                 <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" onClick={() => acessarTurma(id, name, token)}>
                 <SendIcon/>
               </ListItemButton>} style={{ padding: "5px",
@@ -65,7 +67,7 @@ const Turmas = () => {
                   <FolderIcon/>
                   <ListItemText primary={name} style={{marginLeft: "5px"}}/>
                 </ListItem>
-              ))}
+              )))}
             </div>
           </Box>
         )}

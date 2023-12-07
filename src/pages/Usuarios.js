@@ -117,7 +117,9 @@ const Usuarios = () => {
       const promises = data.map(async ({ id }) => {
         const submissionteacher = new SubmissionTeacher(token, id);
         const submissions = await submissionteacher.getSubmissions();
-        if (submissions.lenght != 0){
+        console.log(submissions.length);
+        if (submissions.length !== 0){
+          console.log("caiu aqui");
           tudovazio = false;
         }
         return submissions;
@@ -257,10 +259,12 @@ const Usuarios = () => {
         [userId]: true,
       };
     });
-  }
-  
+  }  
 
   async function obterProblemas(userData) {
+    if (userData.length === 0) {
+      return;
+    }
     const problems = new Problem(token, idtarefa, userData[0].id);
     const data = await problems.getProblems();
 
@@ -367,55 +371,58 @@ const Usuarios = () => {
           }}>
           </Box>
           <div>
-            {userData.map(({ id, name }) => (
-              <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" >
-                {loading[id] ? (
-                  <CircularProgress size={24} />
-                ) :
-                  error[id] ? (
-                    <Typography variant="body2" color="error">SEM SUBMISSÕES DO ALUNO</Typography>
-                  )
-                  :
-                  errorCalculo[id] ? (
-                    <Typography variant="body2" color="error">ERRO NO CÁLCULO DAS PONTUAÇÕES </Typography>
-                  )
-                  :
-                  errorTeacher[id] ? (
-                    <Typography variant="body2" color="error">SEM SUBMISSÕES DO PROFESSOR </Typography>
-                  ) : warning[id] && goodwarning[id] ? (
-                    <>
-                      <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA </Typography>
-                      <Typography variant="body2" color="black">&</Typography>
-                      <Typography variant="body2" color="blue">PONTUAÇÃO ALTA </Typography>
-                      <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
-                    </>
-                  )
-                  : warning[id] ? (
-                    <>
-                      <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA</Typography>
-                      <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
-                    </>
-                  )
-                    : goodwarning[id] ? (
-                      <>
-                        <Typography variant="body2" color="blue">PONTUAÇÃO ALTA </Typography>
-                        <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
-                      </>
-                    )
-                    : (
-                      <>
-                        <Typography variant="body2" color="green">OK</Typography>
-                        <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
-                      </>
-                    )}
-              </ListItemButton>} style={{
-                padding: "5px",
-                borderBottom: "1px solid black", borderLeft: "1px solid black", borderRight: "1px solid black",
-              }}>
-                <AccountBoxIcon />
-                <ListItemText primary={name} style={{ marginLeft: "5px" }} />
-              </ListItem>
-            ))}
+            {userData.length === 0 ? (
+              <ListItem variant="body2" style={{color: "red", fontSize: "18px", border: "1px solid black"}}>Nenhum aluno cadastrado na turma</ListItem>
+            ) : (
+                userData.map(({ id, name }) => (
+                  <ListItem key={id} component="div" disablePadding secondaryAction={<ListItemButton component="a" >
+                    {loading[id] ? (
+                      <CircularProgress size={24} />
+                    ) :
+                      error[id] ? (
+                        <Typography variant="body2" color="error">SEM SUBMISSÕES DO ALUNO</Typography>
+                      )
+                      :
+                      errorCalculo[id] ? (
+                        <Typography variant="body2" color="error">ERRO NO CÁLCULO DAS PONTUAÇÕES </Typography>
+                      )
+                      :
+                      errorTeacher[id] ? (
+                        <Typography variant="body2" color="error">SEM SUBMISSÕES DO PROFESSOR </Typography>
+                      ) : warning[id] && goodwarning[id] ? (
+                        <>
+                          <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA </Typography>
+                          <Typography variant="body2" color="black">&</Typography>
+                          <Typography variant="body2" color="blue">PONTUAÇÃO ALTA </Typography>
+                          <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
+                        </>
+                      )
+                      : warning[id] ? (
+                        <>
+                          <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA</Typography>
+                          <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
+                        </>
+                      )
+                        : goodwarning[id] ? (
+                          <>
+                            <Typography variant="body2" color="blue">PONTUAÇÃO ALTA </Typography>
+                            <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
+                          </>
+                        )
+                        : (
+                          <>
+                            <Typography variant="body2" color="green">OK</Typography>
+                            <SendIcon onClick={() => acessarSubmissoes(id, name, submissoesruins, submissoesboas, submissoesnormais)} />
+                          </>
+                        )}
+                  </ListItemButton>} style={{
+                    padding: "5px",
+                    borderBottom: "1px solid black", borderLeft: "1px solid black", borderRight: "1px solid black",
+                  }}>
+                    <AccountBoxIcon />
+                    <ListItemText primary={name} style={{ marginLeft: "5px" }} />
+                  </ListItem>
+            )))}
           </div>
         </Box>
       </Container>
