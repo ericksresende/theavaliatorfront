@@ -26,6 +26,7 @@ const Usuarios = () => {
   const [userData, setUserData] = useState([]);
   const [loading, setLoading] = useState({}); // Inicialmente, o estado de carregamento está definido como verdadeiro
   const [error, setError] = useState({}); // Inicialmente, o estado de carregamento está definido como verdadeiro
+  const [errorTeacher, setErrorTeacher] = useState({});
   const [errorCalculo, setErrorCalculo] = useState({});
   const [warning, setWarning] = useState({}); // Inicialmente, o estado de carregamento está definido como verdadeiro
   const [goodwarning, setGoodWarning] = useState({});
@@ -110,11 +111,15 @@ const Usuarios = () => {
 
   async function obterSubmissoesProfessor(data) {
     const arraySubmissoesProfessor = [];
+    let tudovazio = true;
 
     if (Array.isArray(data) && data) {
       const promises = data.map(async ({ id }) => {
         const submissionteacher = new SubmissionTeacher(token, id);
         const submissions = await submissionteacher.getSubmissions();
+        if (submissions.lenght != 0){
+          tudovazio = false;
+        }
         return submissions;
       });
 
@@ -123,7 +128,13 @@ const Usuarios = () => {
       console.error("Data não é um array válido:", data);
     }
 
-    return arraySubmissoesProfessor;
+    const arrayError = ["erro", "erro", "erro"];
+    if (tudovazio === true){
+      return arrayError;
+    }
+    else{
+      return arraySubmissoesProfessor;
+    }
   }
 
   async function obterPontuacoes(index, token, submissionStudentData, submissionTeacherData, arrayProblemas, title) {
@@ -207,20 +218,47 @@ const Usuarios = () => {
       [userId]: !prevErrorCalculo[userId], // Altera o estado de aviso para um ID de usuário específico
     }));
   }
+  
+  function toggleErrorTeacher(userId) {
+    setErrorTeacher((prevErrorTeacher) => ({
+      ...prevErrorTeacher,
+      [userId]: !prevErrorTeacher[userId], // Altera o estado de aviso para um ID de usuário específico
+    }));
+  }
 
   function toggleWarning(userId) {
-    setWarning((prevWarning) => ({
-      ...prevWarning,
-      [userId]: !prevWarning[userId], // Altera o estado de aviso para um ID de usuário específico
-    }));
+    setWarning((prevWarning) => {
+      // Verifica se o aviso já é verdadeiro para o usuário específico
+      if (prevWarning[userId]) {
+        // Se já for verdadeiro, retorna o estado atual sem fazer alterações
+        return prevWarning;
+      }
+  
+      // Se não for verdadeiro, altera o estado de aviso para o ID de usuário específico
+      return {
+        ...prevWarning,
+        [userId]: true,
+      };
+    });
   }
+  
 
   function toggleGoodWarning(userId) {
-    setGoodWarning((prevGoodWarning) => ({
-      ...prevGoodWarning,
-      [userId]: !prevGoodWarning[userId], // Altera o estado de aviso para um ID de usuário específico
-    }));
+    setGoodWarning((prevGoodWarning) => {
+      // Verifica se o aviso já é verdadeiro para o usuário específico
+      if (prevGoodWarning[userId]) {
+        // Se já for verdadeiro, retorna o estado atual sem fazer alterações
+        return prevGoodWarning;
+      }
+  
+      // Se não for verdadeiro, altera o estado de aviso para o ID de usuário específico
+      return {
+        ...prevGoodWarning,
+        [userId]: true,
+      };
+    });
   }
+  
 
   async function obterProblemas(userData) {
     const problems = new Problem(token, idtarefa, userData[0].id);
@@ -229,8 +267,16 @@ const Usuarios = () => {
     const jsonArray = data.problems;
 
     const arraySubmissoesProfessor = await obterSubmissoesProfessor(jsonArray);
-    for (const [index, { id }] of userData.entries()) {
-      obterPontuacoesCadaAluno(index, id, data, arraySubmissoesProfessor)
+    if (arraySubmissoesProfessor[0] === "erro"){
+      for (const [index, { id }] of userData.entries()) {
+        toggleErrorTeacher(id);
+        toggleLoading(id);
+      }
+    }
+    else{
+      for (const [index, { id }] of userData.entries()) {
+        obterPontuacoesCadaAluno(index, id, data, arraySubmissoesProfessor)
+      }
     }
   }
 
@@ -255,41 +301,46 @@ const Usuarios = () => {
   async function obterPontuacoesCadaAluno(index, idusuario, data, arraySubmissoesProfessor) {
     const submissoesAlunoAtual = await obterSubmissaoPorAluno(index, idusuario, data, arraySubmissoesProfessor);
 
+    console.log(arraySubmissoesProfessor);
     if (submissoesAlunoAtual.length > 0) {
-      const pontuacao = await obterPontuacoes(index, token, submissoesAlunoAtual, arraySubmissoesProfessor, data.problems, "teste");
-      if (pontuacao.length === 0){
-        console.log("caiu aqui");
-        toggleErrorCalculo(idusuario);
+      if (arraySubmissoesProfessor.length === 0){
+        toggleErrorTeacher(idusuario);
         toggleLoading(idusuario);
       }
-      try {
-        for (let i = 0; i < pontuacao.length; i++) {
-          const pontuacaonumero = parseFloat(pontuacao[i][0].finalScore);
-          if (pontuacaonumero < 88.0) {
-            toggleWarning(idusuario);
-            console.log("salvando ruim");
-            console.log(pontuacaonumero);
-            setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
-          } else if (pontuacaonumero > 100.0) {
-            toggleGoodWarning(idusuario);
-            console.log("salvando boa");
-            console.log(pontuacaonumero);
-            setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
-          }
-          else if (pontuacaonumero > 88.0 && pontuacaonumero < 100.0) {
-            console.log("salvando normal");
-            console.log(pontuacaonumero);
-            setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
-          }
-          if (i === pontuacao.length - 1) {
+      else {
+
+          const pontuacao = await obterPontuacoes(index, token, submissoesAlunoAtual, arraySubmissoesProfessor, data.problems, "teste");
+          if (pontuacao.length === 0){
+            toggleErrorCalculo(idusuario);
             toggleLoading(idusuario);
           }
+          try {
+            for (let i = 0; i < pontuacao.length; i++) {
+              const pontuacaonumero = parseFloat(pontuacao[i][0].finalScore);
+              if (pontuacaonumero < 88.0) {
+                toggleWarning(idusuario);
+                console.log(pontuacaonumero);
+                setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+              } else if (pontuacaonumero > 103.0) {
+                toggleGoodWarning(idusuario);
+                console.log(pontuacaonumero);
+                setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+              }
+              else if (pontuacaonumero > 88.0 && pontuacaonumero < 103.0) {
+                console.log(pontuacaonumero);
+                setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+              }
+              if (i === pontuacao.length - 1) {
+                toggleLoading(idusuario);
+              }
+            }
+          } catch {
+            console.error("nao foi possivel ler a pontuacao")
+            console.error(submissoesAlunoAtual);
+          }
         }
-      } catch {
-        console.error("nao foi possivel ler a pontuacao")
-        console.error(submissoesAlunoAtual);
-      }
-    } else {
+      } 
+    else {
       toggleLoading(idusuario);
       toggleError(idusuario);
     }
@@ -322,11 +373,15 @@ const Usuarios = () => {
                   <CircularProgress size={24} />
                 ) :
                   error[id] ? (
-                    <Typography variant="body2" color="error">SEM SUBMISSÕES </Typography>
+                    <Typography variant="body2" color="error">SEM SUBMISSÕES DO ALUNO</Typography>
                   )
                   :
                   errorCalculo[id] ? (
                     <Typography variant="body2" color="error">ERRO NO CÁLCULO DAS PONTUAÇÕES </Typography>
+                  )
+                  :
+                  errorTeacher[id] ? (
+                    <Typography variant="body2" color="error">SEM SUBMISSÕES DO PROFESSOR </Typography>
                   ) : warning[id] && goodwarning[id] ? (
                     <>
                       <Typography variant="body2" color="orange">PONTUAÇÃO BAIXA </Typography>
