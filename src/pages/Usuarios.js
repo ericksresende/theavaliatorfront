@@ -320,19 +320,19 @@ const Usuarios = () => {
           }
           try {
             for (let i = 0; i < pontuacao.length; i++) {
-              const pontuacaonumero = parseFloat(pontuacao[i][0].finalScore);
+              const pontuacaonumero = parseFloat(pontuacao[i][1].finalScore);
               if (pontuacaonumero < 88.0) {
                 toggleWarning(idusuario);
                 console.log(pontuacaonumero);
-                setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][1].solution)]);
               } else if (pontuacaonumero > 103.0) {
                 toggleGoodWarning(idusuario);
                 console.log(pontuacaonumero);
-                setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][1].solution)]);
               }
               else if (pontuacaonumero > 88.0 && pontuacaonumero < 103.0) {
                 console.log(pontuacaonumero);
-                setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][1].solution)]);
               }
               if (i === pontuacao.length - 1) {
                 toggleLoading(idusuario);
