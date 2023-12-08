@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL:"https://localhost:7015/api"
+    baseURL:"https://bancotheavaliator-316d4dc95349.herokuapp.com/api"
 })
 
 export default api;
