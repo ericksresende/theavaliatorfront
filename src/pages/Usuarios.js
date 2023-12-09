@@ -182,7 +182,7 @@ const Usuarios = () => {
         for (let j = 0; j < submissionStudentData.length; j++) {
           const submissionStudent = submissionStudentData[j];
           if (problema.id === submissionStudent[0].problem.id) {
-            const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[j], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[0][0].user.id);
+            const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[j], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[0][0].id);
             try {
               const pontuacao = await score.getScore();
               console.log(pontuacao);
