@@ -63,7 +63,7 @@ const Submissoes = () => {
               id: firstCorrectSubmission.id,
               codigo: sourceCodeData,
             }];
-            const score = new ScoreSourceCode(idproblema, alunoinfos, sourceCodeTeacherData, nomeproblema, idturma, idtarefa, firstCorrectSubmissionTeacher.user.id);
+            const score = new ScoreSourceCode(idproblema, alunoinfos, sourceCodeTeacherData, nomeproblema, idturma, idtarefa, firstCorrectSubmissionTeacher.id);
             const pontuacao = await score.getScore();
             setPontuacao(pontuacao);
             setPontuacaoCarregando(false);
