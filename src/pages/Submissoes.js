@@ -34,7 +34,7 @@ const Submissoes = () => {
       try {
         const data = await submission.getSubmissions();
         const maxTries = Math.max(...data.map(({ tries }) => tries));
-        const bestSubmissions = data.filter(({ tries }) => tries === maxTries);
+        const bestSubmissions = data.filter(({ tries, language }) => tries === maxTries && language.name === "Python3");
         setSubmissionData(bestSubmissions);
 
         const firstCorrectSubmission = bestSubmissions.find(({ evaluation }) => evaluation === 'CORRECT');
@@ -45,7 +45,19 @@ const Submissoes = () => {
           setSourceCodeData(codigoAluno);
 
           const teacherData = await submissionteacher.getSubmissions();
-          const firstCorrectSubmissionTeacher = teacherData.find(({ evaluation }) => evaluation === 'CORRECT');
+
+          // Filtrando as submissões corretas do professor
+          const correctTeacherSubmissions = teacherData.filter(submission => submission.evaluation === 'CORRECT');
+
+          // Encontrando o número máximo de tentativas do professor
+          const maxTriesTeacher = Math.max(...correctTeacherSubmissions.map(({ tries }) => tries));
+
+          // Filtrando as melhores submissões do professor (com o mesmo número máximo de tentativas e linguagem Python3)
+          const bestTeacherSubmissions = correctTeacherSubmissions.filter(({ tries, language }) => tries === maxTriesTeacher && language.name === 'Python3');
+
+          // Encontrando a primeira submissão correta do professor
+          const firstCorrectSubmissionTeacher = bestTeacherSubmissions[0];
+
 
           if (firstCorrectSubmissionTeacher) {
             const sourcecodeTeacher = new SourceCode(token, firstCorrectSubmissionTeacher.id);

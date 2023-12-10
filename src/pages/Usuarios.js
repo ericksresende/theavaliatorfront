@@ -119,15 +119,30 @@ const Usuarios = () => {
       const promises = data.map(async ({ id }) => {
         const submissionteacher = new SubmissionTeacher(token, id);
         const submissions = await submissionteacher.getSubmissions();
-        console.log(submissions.length);
-        if (submissions.length !== 0){
-          console.log("caiu aqui");
-          tudovazio = false;
+    
+        // Filtrando as submissões corretas
+        const correctSubmissions = submissions.filter(submission => submission.evaluation === "CORRECT");
+    
+        // Encontrando o número máximo de tentativas
+        const maxTries = Math.max(...correctSubmissions.map(({ tries }) => tries));
+    
+        // Filtrando as melhores submissões (com o mesmo número máximo de tentativas e linguagem Python3)
+        const bestSubmissions = correctSubmissions.filter(({ tries, language }) => tries === maxTries && language.name === "Python3");
+    
+        console.log(bestSubmissions.length);
+    
+        if (bestSubmissions.length !== 0) {
+            console.log("caiu aqui");
+            tudovazio = false;
         }
-        return submissions;
-      });
+    
+        return bestSubmissions;
+    });
+    
+      console.log(promises);
 
       arraySubmissoesProfessor.push(...await Promise.all(promises));
+      console.log(arraySubmissoesProfessor);
     } else {
       console.error("Data não é um array válido:", data);
     }
@@ -165,7 +180,7 @@ const Usuarios = () => {
       const scoreSourceCodeData = []; // Crie um array para armazenar as pontuações
 
       for (const [index, problema] of arrayProblemas.entries()) {
-        const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[index], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[0][0].user.id);
+        const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[index], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[arrayProblemas.indexOf(problema)][0].id);
 
         try {
           const pontuacao = await score.getScore();
@@ -183,8 +198,12 @@ const Usuarios = () => {
         const problema = arrayProblemas[i];
         for (let j = 0; j < submissionStudentData.length; j++) {
           const submissionStudent = submissionStudentData[j];
+          console.log("caiu aqui");
           if (problema.id === submissionStudent[0].problem.id) {
-            const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[j], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[0][0].id);
+            console.log("caiu aqui tambem");
+            console.log(submissionTeacherData);
+            const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[j], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[arrayProblemas.indexOf(problema)][0].id);
+            console.log(submissionTeacherData[arrayProblemas.indexOf(problema)][0].id);
             try {
               const pontuacao = await score.getScore();
               console.log(pontuacao);
