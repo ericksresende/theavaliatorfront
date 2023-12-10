@@ -43,6 +43,8 @@ const Usuarios = () => {
   const nometurma = sessionStorage.getItem('nometurma');
   const idturma = sessionStorage.getItem('idturma');
   const dadosusuario = sessionStorage.getItem('dadosusuario');
+  const limiteinferior = 88.0;
+  const limitesuperior = 103.0;
 
   const user = new User(token, idtarefa);
   const navigate = useNavigate();
@@ -296,7 +298,7 @@ const Usuarios = () => {
       }
 
       const maxTries = Math.max(...correctSubmissions.map(({ tries }) => tries));
-      const bestSubmissions = correctSubmissions.filter(({ tries }) => tries === maxTries);
+      const bestSubmissions = correctSubmissions.filter(({ tries, language }) => tries === maxTries && language.name === "Python3");
       submissoesAlunoAtual.push(bestSubmissions);
     }
     return submissoesAlunoAtual;
@@ -321,16 +323,16 @@ const Usuarios = () => {
           try {
             for (let i = 0; i < pontuacao.length; i++) {
               const pontuacaonumero = parseFloat(pontuacao[i][0].finalScore);
-              if (pontuacaonumero < 88.0) {
+              if (pontuacaonumero < limiteinferior) {
                 toggleWarning(idusuario);
                 console.log(pontuacaonumero);
                 setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
-              } else if (pontuacaonumero > 103.0) {
+              } else if (pontuacaonumero > limitesuperior) {
                 toggleGoodWarning(idusuario);
                 console.log(pontuacaonumero);
                 setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
               }
-              else if (pontuacaonumero > 88.0 && pontuacaonumero < 103.0) {
+              else if (pontuacaonumero > limiteinferior && pontuacaonumero < limitesuperior) {
                 console.log(pontuacaonumero);
                 setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
               }
