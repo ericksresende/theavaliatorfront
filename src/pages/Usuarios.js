@@ -165,24 +165,27 @@ const Usuarios = () => {
       console.log(submissionTeacherData);
       try{
         const sourcecodeProfessor = new SourceCode(token, submissionTeacherData[index][0].id);
+        console.log("se encontra aqui");
         await sourcecodeProfessor.getSourceCode().then((data) => {
           sourceCodeProfessorData.push(data);
         });
       }
       catch (error) {
-        console.error(sourceCodeAlunosData);
+        sourceCodeProfessorData.push([]);
       }
     }
     console.log(submissionTeacherData);
 
     const arrayerros = [];
+    console.log(arrayProblemas);
+    console.log(sourceCodeProfessorData);
     if (submissionStudentData.length == arrayProblemas.length) {
       const scoreSourceCodeData = []; // Crie um array para armazenar as pontuações
 
       for (const [index, problema] of arrayProblemas.entries()) {
-        const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[index], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[arrayProblemas.indexOf(problema)][0].id);
 
         try {
+          const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[index], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[arrayProblemas.indexOf(problema)][0].id);
           const pontuacao = await score.getScore();
           scoreSourceCodeData.push(pontuacao);
           arrayerros.push("erro");
@@ -194,15 +197,19 @@ const Usuarios = () => {
       return scoreSourceCodeData; // Retorna todas as pontuações após o loop ter sido completamente executado
     } else {
       const scoreSourceCodeDataDiferente = [];
-      for (let i = 0; i < arrayProblemas.length; i++) {
-        const problema = arrayProblemas[i];
+      for (const [index] of arrayProblemas.entries()) {
+        const problema = arrayProblemas[index];
         for (let j = 0; j < submissionStudentData.length; j++) {
           const submissionStudent = submissionStudentData[j];
           console.log("caiu aqui");
           if (problema.id === submissionStudent[0].problem.id) {
+            if (submissionTeacherData[index].length === 0){
+              continue;
+            }
             console.log("caiu aqui tambem");
-            console.log(submissionTeacherData);
-            const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[j], sourceCodeProfessorData[arrayProblemas.indexOf(problema)], problema.name, idturma, idtarefa, submissionTeacherData[arrayProblemas.indexOf(problema)][0].id);
+            console.log(index);
+            console.log(index, submissionTeacherData[index]);
+            const score = new ScoreSourceCode(problema.id, sourceCodeAlunosData[j], sourceCodeProfessorData[index], problema.name, idturma, idtarefa, submissionTeacherData[index][0].id);
             console.log(submissionTeacherData[arrayProblemas.indexOf(problema)][0].id);
             try {
               const pontuacao = await score.getScore();
@@ -341,19 +348,19 @@ const Usuarios = () => {
           }
           try {
             for (let i = 0; i < pontuacao.length; i++) {
-              const pontuacaonumero = parseFloat(pontuacao[i][0].finalScore);
+              const pontuacaonumero = parseFloat(pontuacao[i][1].finalScore);
               if (pontuacaonumero < limiteinferior) {
                 toggleWarning(idusuario);
                 console.log(pontuacaonumero);
-                setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][1].solution)]);
               } else if (pontuacaonumero > limitesuperior) {
                 toggleGoodWarning(idusuario);
                 console.log(pontuacaonumero);
-                setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][1].solution)]);
               }
               else if (pontuacaonumero > limiteinferior && pontuacaonumero < limitesuperior) {
                 console.log(pontuacaonumero);
-                setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][1].solution)]);
               }
               if (i === pontuacao.length - 1) {
                 toggleLoading(idusuario);

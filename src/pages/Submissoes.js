@@ -58,7 +58,6 @@ const Submissoes = () => {
           // Encontrando a primeira submissão correta do professor
           const firstCorrectSubmissionTeacher = bestTeacherSubmissions[0];
 
-
           if (firstCorrectSubmissionTeacher) {
             const sourcecodeTeacher = new SourceCode(token, firstCorrectSubmissionTeacher.id);
             const codigoProfessor = await sourcecodeTeacher.getSourceCode();
@@ -118,11 +117,11 @@ const Submissoes = () => {
             <Grid container spacing={1}>
               <Grid item xs={12}>
               <Box display="flex" justifyContent="space-between" p={2}>
-                <BasicCard text="Cyclomatic Complexity" value={pontuacao ? pontuacao[0].cyclomaticComplexity : "Carregando..."} exceedlimit={pontuacao ? pontuacao[0].exceededLimitCC : "Carregando..."} />
-                <BasicCard text="Lines of Code" value={pontuacao ? pontuacao[0].linesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao[0].exceededLimitLOC : "Carregando..."} />
-                <BasicCard text="Logical Lines of Code" value={pontuacao ? pontuacao[0].logicalLinesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao[0].exceededLimitLLOC : "Carregando..."} />
-                <BasicCard text="Source Lines of Code" value={pontuacao ? pontuacao[0].sourceLinesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao[0].limitSLOC : "Carregando..."} />
-                <BasicCard text="Final Score" value={pontuacao ? pontuacao[0].finalScore : "Carregando..."} />
+                <BasicCard text="Cyclomatic Complexity" value={pontuacao ? pontuacao[1].cyclomaticComplexity : "Carregando..."} exceedlimit={pontuacao ? pontuacao[1].exceededLimitCC : "Carregando..."} />
+                <BasicCard text="Lines of Code" value={pontuacao ? pontuacao[1].linesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao[1].exceededLimitLOC : "Carregando..."} />
+                <BasicCard text="Logical Lines of Code" value={pontuacao ? pontuacao[1].logicalLinesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao[1].exceededLimitLLOC : "Carregando..."} />
+                <BasicCard text="Source Lines of Code" value={pontuacao ? pontuacao[1].sourceLinesOfCode : "Carregando..."} exceedlimit={pontuacao ? pontuacao[1].limitSLOC : "Carregando..."} />
+                <BasicCard text="Final Score" value={pontuacao ? pontuacao[1].finalScore : "Carregando..."} />
               </Box>
               </Grid>
             </Grid>
@@ -145,11 +144,11 @@ const Submissoes = () => {
           <Grid container spacing={1}>
                 <Grid item xs={12}>
                 <Box display="flex" justifyContent="space-between" p={2}>
-                  <BasicCard text="Cyclomatic Complexity" value={pontuacao ? pontuacao[1].cyclomaticComplexity : "Carregando..."} />
-                  <BasicCard text="Lines of Code" value={pontuacao ? pontuacao[1].linesOfCode : "Carregando..."} />
-                  <BasicCard text="Logical Lines of Code" value={pontuacao ? pontuacao[1].logicalLinesOfCode : "Carregando..."} />
-                  <BasicCard text="Source Lines of Code" value={pontuacao ? pontuacao[1].sourceLinesOfCode : "Carregando..."} />
-                  <BasicCard text="Final Score" value={pontuacao ? pontuacao[1].finalScore : "Carregando..."} />
+                  <BasicCard text="Cyclomatic Complexity" value={pontuacao ? pontuacao[0].cyclomaticComplexity : "Carregando..."} />
+                  <BasicCard text="Lines of Code" value={pontuacao ? pontuacao[0].linesOfCode : "Carregando..."} />
+                  <BasicCard text="Logical Lines of Code" value={pontuacao ? pontuacao[0].logicalLinesOfCode : "Carregando..."} />
+                  <BasicCard text="Source Lines of Code" value={pontuacao ? pontuacao[0].sourceLinesOfCode : "Carregando..."} />
+                  <BasicCard text="Final Score" value={pontuacao ? pontuacao[0].finalScore : "Carregando..."} />
                 </Box>
                 </Grid>
             </Grid>

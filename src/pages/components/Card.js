@@ -20,7 +20,7 @@ export default function BasicCard(props) {
       }}>
         <Typography variant="body3" textTransform="uppercase">{text}</Typography>
         {text === "Final Score" ? (
-          <Typography variant="h5" style={{ color: value < 88 ? 'red' : value > 100 ? 'lightgreen' : 'white' }}>
+          <Typography variant="h5" style={{ color: value < 88 ? 'red' : value > 103 ? 'lightgreen' : 'white' }}>
             {value}
           </Typography>
         ) : (
