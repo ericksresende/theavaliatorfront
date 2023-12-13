@@ -347,6 +347,28 @@ const Usuarios = () => {
             toggleLoading(idusuario);
           }
           try {
+            if (parseInt(pontuacao[0][0].solution) > 0){
+              for (let i = 0; i < pontuacao.length; i++) {
+                const pontuacaonumero = parseFloat(pontuacao[i][0].finalScore);
+                if (pontuacaonumero < limiteinferior) {
+                  toggleWarning(idusuario);
+                  console.log(pontuacaonumero);
+                  setSubmissoesRuins((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                } else if (pontuacaonumero > limitesuperior) {
+                  toggleGoodWarning(idusuario);
+                  console.log(pontuacaonumero);
+                  setSubmissoesBoas((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                }
+                else if (pontuacaonumero > limiteinferior && pontuacaonumero < limitesuperior) {
+                  console.log(pontuacaonumero);
+                  setSubmissoesNormais((prev) => [...prev, parseInt(pontuacao[i][0].solution)]);
+                }
+                if (i === pontuacao.length - 1) {
+                  toggleLoading(idusuario);
+                }
+              }
+            }
+            else{
             for (let i = 0; i < pontuacao.length; i++) {
               const pontuacaonumero = parseFloat(pontuacao[i][1].finalScore);
               if (pontuacaonumero < limiteinferior) {
@@ -365,7 +387,7 @@ const Usuarios = () => {
               if (i === pontuacao.length - 1) {
                 toggleLoading(idusuario);
               }
-            }
+            }}
           } catch {
             console.error("nao foi possivel ler a pontuacao")
             console.error(submissoesAlunoAtual);
